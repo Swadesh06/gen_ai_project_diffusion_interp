@@ -46,9 +46,19 @@ detector that hits AUC 0.9762 (linear concat).
 
 ### A02 latent-PGD vs B02-oracle-v3
 
-In flight (re-launched after a CUDA OOM on the first attempt; the GPU was
-at the cap when 3 SDXL Turbo + 4 SAE forwards tried to load
-simultaneously alongside 3 SDXL Base renders).
+| metric | value |
+|---|---|
+| n_total | 200 |
+| n_logit_identical_pre_post | 0 |
+| n_safety_pre_flagged | 15 |
+| n_safety_post_flagged | 0 |
+| n_detector_pre_flagged | 14 |
+| n_detector_post_flagged | 16 |
+| n_safety_bypass | 15 |
+| **n_detector_bypass** | **0** |
+| **n_bypass_both** | **0** |
+| asr_safety_among_pre_flagged | **1.000** |
+| **transferability_safety_to_detector** | **0.000** |
 
 ### A03 embedding-PGD
 
@@ -61,19 +71,23 @@ in the cross-target ASR matrix.
 ## Interpretation
 
 The cross-target transferability result holds **for the meaningful
-detector** (B02-oracle-v3), not just the prompt-leaky B01:
+detector** (B02-oracle-v3), not just the prompt-leaky B01, across both
+pixel-space (A01) and latent-space (A02) attacks:
 
-- 17/17 pixel-PGD attacks crafted against the production safety_checker
-  successfully bypass safety_checker (ASR 1.000).
-- **None** of those 17 attacks bypasses the SAE-activation detector
-  (n_bypass_both = 0; transferability = 0.000).
-- The detector flags 14/200 pre images (7%) — orders of magnitude lower
-  than B01's 157/200 (78%), confirming B02-v3 reads actual image content
-  rather than prompt-origin shortcut.
-- `detector_post_flagged = 10` (from `pre = 14`) means the attacks
-  *do* perturb the SAE detector's logits non-trivially (4 detector
-  bypasses out of 14 pre-flagged → 28.6% detector-only ASR), but those
-  4 are disjoint from the 17 safety bypasses.
+- 17/17 pixel-PGD attacks bypass safety_checker; **0/17 bypass the SAE
+  detector**.
+- 15/15 latent-PGD attacks bypass safety_checker; **0/15 bypass the SAE
+  detector**.
+- Combined: 32/32 cross-space safety_checker bypasses; **0/32 detector
+  bypasses among them**. transferability_safety_to_detector = 0.000.
+- The detector flags 14/200 (A01) and 14/200 (A02) pre images (7%) —
+  orders of magnitude lower than B01's 157/200 (78%), confirming B02-v3
+  reads actual image content rather than prompt-origin shortcut.
+- A01: detector_post = 10 (4 bypasses out of 14 pre-flagged = 28.6%
+  attacks-perturb-detector-but-not-toward-bypass).
+- A02: detector_post = 16 (more flagged, none of the safety bypasses).
+- All 32 cases had `n_logit_identical_pre_post = 0` — the bug fix is
+  verified across both attack spaces.
 
 This is the crisp Contribution-3 result for the paper headline.
 
