@@ -113,14 +113,14 @@ def main() -> int:
             for hp in HOOKPOINTS:
                 z = mgr.captured[hp].z[0]   # (B, ?, ?, D) or (B, D)
                 v = z.float().mean(dim=tuple(range(1, z.ndim - 1)))  # (B, D_hidden)
-                sae_feats.append(v)
+                sae_feats.append(v.to(args.device))
                 # raw: the pre-SAE residual diff input is captured if keep_inputs=True
                 rin = mgr.captured[hp].inputs[0] if mgr.captured[hp].inputs else None
                 if rin is None:
                     raw_feats.append(torch.zeros((z.shape[0], 1280), device=args.device))
                 else:
                     rv = rin.float().mean(dim=tuple(range(1, rin.ndim - 1)))
-                    raw_feats.append(rv)
+                    raw_feats.append(rv.to(args.device))
         return torch.cat(raw_feats, dim=-1), torch.cat(sae_feats, dim=-1)
 
     bs = 4
