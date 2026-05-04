@@ -102,14 +102,22 @@ def main() -> int:
         try:
             todo = list_unlabelled(root)
         except Exception as e:
-            print(f"scan error: {e}")
+            print(f"scan error: {e}", flush=True)
             todo = []
         for p in todo:
-            t0 = time.time()
-            rec = label_image(p, scorers)
-            sidecar = p.with_suffix(p.suffix + LABEL_SUFFIX)
-            sidecar.write_text(json.dumps(rec, indent=2))
-            print(f"  {p.name}: flagged={rec.get('flagged_any')} ({time.time()-t0:.1f}s)")
+            try:
+                if not p.exists():
+                    continue                       # disappeared between scan and label
+                t0 = time.time()
+                rec = label_image(p, scorers)
+                sidecar = p.with_suffix(p.suffix + LABEL_SUFFIX)
+                sidecar.parent.mkdir(parents=True, exist_ok=True)
+                sidecar.write_text(json.dumps(rec, indent=2))
+                if rec.get("flagged_any") or (time.time() - t0) > 1.0:
+                    print(f"  {p.name}: flagged={rec.get('flagged_any')} ({time.time()-t0:.2f}s)", flush=True)
+            except Exception as e:
+                print(f"  {p.name}: label error {type(e).__name__}: {e}", flush=True)
+                continue
         if args.once:
             break
         time.sleep(args.interval)

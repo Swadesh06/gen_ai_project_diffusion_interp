@@ -27,29 +27,37 @@ from dsi.config import cfg  # noqa: E402
 
 def gen_batch(pipe_w, prompts, *, batch_size: int, seed_offset: int, out_dir: Path,
               num_inference_steps: int = 1, guidance_scale: float = 0.0):
+    """Real batched generation. One pipeline call per `batch_size` prompts; per-image
+    seeds via a list of `torch.Generator`s.
+    """
+    import torch
+
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
     for start in range(0, len(prompts), batch_size):
         batch = prompts[start : start + batch_size]
         seeds = list(range(seed_offset + start, seed_offset + start + len(batch)))
-        for prompt, seed in zip(batch, seeds):
-            images = pipe_w.generate(
-                prompts=[prompt.text],
-                num_inference_steps=num_inference_steps,
-                guidance_scale=guidance_scale,
-                seed=seed,
-            )
+        gens = [torch.Generator(device=pipe_w.device).manual_seed(s) for s in seeds]
+        out = pipe_w.pipe(
+            prompt=[p.text for p in batch],
+            num_inference_steps=num_inference_steps,
+            guidance_scale=guidance_scale,
+            generator=gens,
+            height=512, width=512,
+        )
+        images = out.images
+        for img, prompt, seed in zip(images, batch, seeds):
             stem = f"{seed:08d}"
             img_path = out_dir / f"{stem}.png"
             meta_path = out_dir / f"{stem}.png.meta.json"
-            images[0].save(img_path)
+            img.save(img_path)
             meta_path.write_text(json.dumps({
                 "prompt": prompt.text, "seed": seed, "source": prompt.source,
                 "label": prompt.label, "category": prompt.category,
             }))
             written.append(img_path)
-        if start % (10 * batch_size) == 0:
-            print(f"  {start + len(batch)}/{len(prompts)}")
+        if (start // batch_size) % 10 == 0:
+            print(f"  {start + len(batch)}/{len(prompts)}", flush=True)
     return written
 
 
