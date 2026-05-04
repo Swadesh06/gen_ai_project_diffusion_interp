@@ -119,7 +119,8 @@ def main() -> int:
                 if rin is None:
                     raw_feats.append(torch.zeros((z.shape[0], 1280), device=args.device))
                 else:
-                    rv = rin.float().mean(dim=tuple(range(1, rin.ndim - 1)))
+                    # rin is (B, C, H, W) from UNet residual; mean over spatial (H, W) → (B, C)
+                    rv = rin.float().mean(dim=(2, 3))
                     raw_feats.append(rv.to(args.device))
         return torch.cat(raw_feats, dim=-1), torch.cat(sae_feats, dim=-1)
 

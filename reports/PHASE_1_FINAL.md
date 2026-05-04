@@ -120,3 +120,65 @@ Stage 2 |Δ| top-feature spread per block (λ=250, Q16 oracle, COCO-neutral seed
   `outputs/`.
 - Verify_assets matrix: `python scripts/verify_assets.py` — 24/24 green.
 - 66/66 unit tests pass: `pytest tests/`.
+
+---
+
+## Phase C addendum — autonomous-loop session
+
+### Adversarial robustness of safety_checker (Phase C-1)
+
+| attack | gradient access | ASR among pre-flagged |
+|---|---|---|
+| A01 pixel-PGD ε=4/255          | yes  | 1.000 (17/17) |
+| **C01 Square Attack ε=4/255 (q=5K)** | **no** | **0.875 (7/8)** |
+
+Black-box / white-box ratio = 0.875. Passes appendix §G C-1 gate (≥0.30) by 2.9×.
+The safety_checker has no meaningful adversarial robustness even to a smallest-
+threat-model attacker: 2/7 bypasses landed at q=1 (init noise alone crosses the
+boundary). Refutes the "PGD is gradient-access artefact" objection.
+
+### Detector probe — raw vs SAE vs safety-trained SAE (Phase C-2 + C-3)
+
+In-distribution NSFW-vs-benign labels (n=1000):
+
+| signal       | val AUC | dim    |
+|---|---|---|
+| raw_all_cat                   | 1.0000 | 5120 |
+| surkov_sae_all_cat            | 0.9879 | 20480 |
+| **safety_sae down.2.1 alone** | **1.0000** | 10240 |
+| safety_sae mid.0 alone        | 0.9976 | 10240 |
+| hybrid (raw‖surkov_sae)       | 1.0000 | 25600 |
+
+C-2 outcome: raw saturates and Surkov SAE drops 1.21 pp. C-3 outcome:
+safety-trained SAE recovers the 1.21 pp gap and ties raw. The interpretability
+trade-off (sparse 64-d codes) is paid back when the SAE is supervised.
+
+### Patch primitive ablation (Phase 1 contribution 4 deepening)
+
+| primitive | safety correction | FID Δ vs pre |
+|---|---|---|
+| mean      | 0.40 | +0.28 |
+| zero      | 0.40 | +0.32 |
+| resample  | 0.40 | +0.28 |
+
+All three patch kinds collapse on safety_checker correction and on FID.
+F_c quality (Stage 1 ∩ Stage 2) dominates patch primitive choice.
+
+### F_c structural analysis
+
+| metric | value |
+|---|---|
+| n features                          | 69 |
+| pairwise \|corr\| off-diag mean    | 0.030 |
+| pairwise \|corr\| off-diag max     | 0.999 |
+| effective rank (∑σ)² / ∑σ²         | 23.62 (34%) |
+
+F_c subspace is compressible: ~45 features carry redundant information.
+Safety-trained SAE F_c will be smaller (test ongoing).
+
+### Generation backbone — SDXL Turbo vs SDXL Base 4-step
+
+200 SDXL Base CFG=7.5 4-step I2P-NSFW gens completed in 522 s, 7.6 GB
+peak VRAM. safety_checker scoring in flight; expected pre-flag rate
+30-50% (vs SDXL Turbo 1-step's 7-12%).
+

@@ -55,9 +55,23 @@ def main() -> int:
     from dsi.models.sdxl_pipeline import SDXLPipelineWrapper
     pipe_w = SDXLPipelineWrapper(variant="turbo", device=args.device, dtype="fp16").load()
 
-    print("loading SafetyTarget")
-    from dsi.attacks.safety_target import SafetyTarget
-    target = SafetyTarget(device=args.device, dtype="fp16").load(vae=pipe_w.vae)
+    if args.target == "safety_checker":
+        print("loading SafetyTarget")
+        from dsi.attacks.safety_target import SafetyTarget
+        target = SafetyTarget(device=args.device, dtype="fp16").load(vae=pipe_w.vae)
+        target_logit_fn = lambda x: target.pixel_to_logits(x).float()  # noqa: E731
+    elif args.target == "sae_detector":
+        print(f"loading SAEDetectorTarget from {args.detector_ckpt}")
+        from dsi.attacks.sae_detector_target import SAEDetectorTarget
+        from dsi.sae.load import load_surkov_sae
+        sae_dict = {hp: load_surkov_sae(hp).to(args.device).eval()
+                    for hp in ("down.2.1", "mid.0", "up.0.0", "up.0.1")}
+        target = SAEDetectorTarget(detector_ckpt=args.detector_ckpt, pipe_w=pipe_w,
+                                   sae_dict=sae_dict, device=args.device, dtype="fp16").load()
+        # SAE detector returns a single safe-prob logit; loss = unsafe = -logit
+        target_logit_fn = lambda x: target.x_to_logit(x).float().unsqueeze(-1)  # noqa: E731
+    else:
+        raise ValueError(args.target)
 
     print("loading I2P-NSFW prompts")
     from dsi.data.i2p import i2p_nsfw_subset
@@ -81,7 +95,7 @@ def main() -> int:
                           generator=gen, height=H, width=W)
         x0 = torch.as_tensor(np.array(out.images[0], dtype=np.float32) / 255.0).permute(2, 0, 1).unsqueeze(0).to(args.device)
         with torch.no_grad():
-            l_pre = target.pixel_to_logits(x0).float()
+            l_pre = target_logit_fn(x0).float()
         if l_pre[0, 0].item() <= 0:
             # not pre-flagged; nothing to bypass for this seed
             rows.append({"seed": seed, "prompt": prompt.text, "pre_flagged": False,
@@ -94,7 +108,7 @@ def main() -> int:
         x = (x0.cpu().numpy() + delta_init).clip(0, 1)
         x_t = torch.as_tensor(x, device=args.device)
         with torch.no_grad():
-            best_loss = float(target.pixel_to_logits(x_t).float()[0, 0])
+            best_loss = float(target_logit_fn(x_t).float()[0, 0])
 
         bypassed = False
         q = 0
@@ -112,7 +126,7 @@ def main() -> int:
             cand[0, :, row:row+s, col:col+s] = (x0.cpu().numpy()[0, :, row:row+s, col:col+s] + new_delta).clip(0, 1)
             cand_t = torch.as_tensor(cand, device=args.device)
             with torch.no_grad():
-                l_cand = float(target.pixel_to_logits(cand_t).float()[0, 0])
+                l_cand = float(target_logit_fn(cand_t).float()[0, 0])
             q += 1
             if l_cand < best_loss:
                 best_loss = l_cand
