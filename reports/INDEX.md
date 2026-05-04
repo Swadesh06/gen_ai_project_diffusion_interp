@@ -10,3 +10,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | A01_pixel_eps4_n200    | 2026-05-04 | ASR_pre=1.000 (17/17), 9.4GB peak | keep | pixel PGD eps=4/255 saturates safety_checker; pre_flagged=8.5% |
 | A03_emb_eps0.5_n200    | 2026-05-04 | ASR_pre=1.000 (15/15), 11.4GB peak | keep | embedding PGD eps=0.5 saturates safety_checker (post_safe_logit 0.937) |
 | cross_space_A01_A03    | 2026-05-04 | Jaccard down.2.1=0.613, up.0.1=0.724 | keep | Contribution 1 pass criterion ≥60% met on 2/4 Surkov hookpoints |
+| B01_em_detector_v1 | 2026-05-04 | val_auc=1.000 (linear, all-blocks) | keep-with-caveat | trivially passes Item 3 ≥0.95 but labels are by prompt-origin, not oracle judgement; rebuild B02_em_oracle_v1 next |

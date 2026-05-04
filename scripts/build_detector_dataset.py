@@ -33,6 +33,26 @@ def collect(sae_root: Path, label: int, source_tag: str) -> list[tuple[Path, int
     return out
 
 
+def _load_one(arg):
+    """Module-level worker for multiprocessing.Pool."""
+    import torch as _torch
+
+    fpath, label, tag, pool = arg
+    try:
+        payload = _torch.load(fpath, map_location="cpu", weights_only=False)
+    except Exception as e:
+        return (fpath, label, tag, None, repr(e))
+    out_per_block = {}
+    for hp, z in payload.items():
+        if z is None:
+            continue
+        arr = z.float().numpy()
+        spatial = tuple(range(arr.ndim - 1))
+        v = arr.mean(axis=spatial) if pool == "mean" else arr.max(axis=spatial)
+        out_per_block[hp] = v
+    return (fpath, label, tag, out_per_block, None)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--nsfw-sae-dirs", nargs="+", required=True,
@@ -59,24 +79,31 @@ def main() -> int:
     if not samples:
         return 2
 
+    # Parallel read with multiprocessing (mfs latency is the bottleneck).
+    import multiprocessing as mp
+    import time as _time
+
+    args_list = [(str(f), label, tag, args.pool) for (f, label, tag) in samples]
+    n_workers = min(16, max(2, mp.cpu_count() // 8))
+    print(f"reading {len(args_list)} sae.pt files via {n_workers} mp workers ...", flush=True)
     per_block: dict[str, list] = {}
     labels: list[int] = []
     meta: list[dict] = []
-    for f, label, tag in samples:
-        try:
-            payload = torch.load(f, map_location="cpu", weights_only=False)
-        except Exception as e:
-            print(f"skip {f}: {e}")
-            continue
-        for hp, z in payload.items():
-            if z is None:
+    t0 = _time.time()
+
+    with mp.Pool(n_workers) as pool:
+        for i, (fpath, label, tag, blocks, err) in enumerate(
+            pool.imap_unordered(_load_one, args_list, chunksize=4),
+        ):
+            if err is not None:
+                print(f"skip {Path(fpath).name}: {err}", flush=True)
                 continue
-            arr = z.float().numpy()
-            spatial = tuple(range(arr.ndim - 1))
-            v = arr.mean(axis=spatial) if args.pool == "mean" else arr.max(axis=spatial)
-            per_block.setdefault(hp, []).append(v)
-        labels.append(label)
-        meta.append({"file": str(f), "label": label, "source": tag})
+            for hp, v in blocks.items():
+                per_block.setdefault(hp, []).append(v)
+            labels.append(label)
+            meta.append({"file": fpath, "label": label, "source": tag})
+            if (i + 1) % 100 == 0:
+                print(f"  [{i+1}/{len(args_list)}] {_time.time()-t0:.1f}s", flush=True)
 
     for hp, lst in per_block.items():
         X = np.stack(lst).astype("float32")
