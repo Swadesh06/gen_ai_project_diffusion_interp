@@ -34,3 +34,9 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | cf_strategy3a_gemini_v1 | 2026-05-04 | 400 rows, 0 refusals on gemini-3.1-flash-lite-preview | keep | Item 1c-0 Strategy 3 Path A; cheapest model handles all unsafe cells, 1200 paraphrases |
 | C01_xtarget_v2_A01_vs_B01 | 2026-05-04 | 0/17 detector bypass; 0 identical logits | keep | Item 1c-1 fix; image-conditioned UNet trace fixes the bit-identical bug, original conclusion holds |
 | C03_safety_sae_v2_detector | 2026-05-04 | concat MLP AUC=1.000 (vs raw 1.000, surkov 0.985) | keep | safety SAE v2 closes the v1 1.21 pp gap; all L0 configs tied at 1.000 |
+| B02_oracle_v3_detector | 2026-05-04 | linear AUC=0.976, MLP AUC=0.977 (1544 samples) | keep | Item 1c-3 close: 5x more NSFW samples (201 vs 41); 12pp lift over v2 |
+| C01_xtarget_v2_A02_vs_B01 | 2026-05-04 | 0/15 detector bypass; transferability=0.000 | keep | latent-PGD vs B01 with image-conditioned trace; matches A01 v2 result |
+| C01_xtarget_v2_A01_vs_B02v3 | 2026-05-04 | 0/17 detector bypass; transferability=0.000 | keep | A01 vs oracle-relabelled B02-v3 detector; meaningful version of cross-target |
+| D07_mechanistic_trajectory_v1 | 2026-05-04 | 5 bypass cases plotted | keep | per-step per-feature SAE trajectory clean vs attacked, paper figure candidate |
+| D02_learned_projection_v1 | 2026-05-04 | per-hookpoint Pi trained, raw + sae | keep | Pi(z_benign)≈z_benign, Pi(z_unsafe)→mu_benign; drop-in for mean-patch |
+| D01_causal_feature_graph_v1 | 2026-05-04 | 98 edges, 18 roots, 18 sinks | keep | Marks-style attribution-by-correlation graph at top-20 Stage-1 features |
