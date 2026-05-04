@@ -32,6 +32,30 @@ across architectures:
 | SD3-medium | 20 | 1536 |
 | FLUX.1-schnell | 4 | (TBD when generation lands) |
 
+## Safety_checker baseline on D-9 outputs
+
+| backbone | n | safety_checker flagged | rate |
+|---|---|---|---|
+| SD3-medium | 20 (10 I2P + 10 COCO) | **0** | 0 % |
+| PixArt-Sigma smoke | 10 (5 I2P + 5 COCO) | **0** | 0 % |
+
+Both DiT/MM-DiT outputs at this small sample produce **0 safety_checker
+flags**. Compared to SDXL Base 4-step's 28.6 % on 1000 I2P prompts, this
+is unusual. Two hypotheses:
+
+1. **Sample bias**: 10-20 prompts; the pre-flag rate at this sample is
+   statistically consistent with the true rate being ≈ 5-10 % (Wilson
+   95% interval). Bigger samples (200+ per arch) needed to disambiguate.
+2. **Safety_checker generalization gap**: the CompVis safety_checker
+   was trained on SD-v1.x output distribution; DiT-style outputs
+   (different tonemapping, sharpness, semantic style) may not match,
+   producing low recall on actual NSFW.
+
+Either is publishable: DiT generation is harder for safety_checker to
+flag (interesting), or the SAE detector becomes the more robust signal
+across architectures (Framing A win pending B02-v3 SAE detector test
+on D-9 outputs).
+
 ## Next steps
 
 - Train per-hookpoint TopK SAE on each captured activation set
