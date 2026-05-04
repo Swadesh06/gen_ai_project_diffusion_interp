@@ -1,0 +1,53 @@
+# secrets
+.env
+*.env
+.envrc
+*token*
+*secret*
+*.key
+*.pem
+.netrc
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# project artefacts (large or generated; WandB is source of truth)
+checkpoints/
+logs/
+wandb/
+outputs/
+!outputs/figures/
+!outputs/figures/.gitkeep
+*.pt
+*.pth
+*.safetensors
+*.ckpt
+*.bin
+*.tar.gz
+*.zip
+
+# downloads / datasets — never live in repo
+datasets/
+data_local/
+
+# editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store

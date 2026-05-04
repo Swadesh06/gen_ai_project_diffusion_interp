@@ -1,0 +1,14 @@
+{
+  "exp_id": "repro_dsg_nudity_1777857836",
+  "task": "baseline reproduction \u2014 DSG-adapted",
+  "upstream": "arXiv:2504.08192 (LLM unlearning); adapted to diffusion",
+  "config": {
+    "tau_ratio_percentile": 95.0,
+    "clamp_value": -1.0
+  },
+  "device": "cpu",
+  "expected_vram_gb": 8.0,
+  "outputs": {
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/repro_dsg_nudity_1777857836.md"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "exp_id": "A02_latent_pgd_1777857827",
+  "task": "Item 2.2 \u2014 VAE-latent PGD",
+  "attack_space": "latent",
+  "config": {
+    "eps": 0.1,
+    "n_steps": 40,
+    "lr": 0.005,
+    "targeted": false,
+    "eps_grid": [
+      0.05,
+      0.1,
+      0.2
+    ]
+  },
+  "n_prompts": 50,
+  "device": "cpu",
+  "expected_vram_gb": 12.0,
+  "co_scheduling": "GPU: latent-PGD ~12GB; co-locate with embedding-PGD ~3GB on same device",
+  "outputs": {
+    "bypass_images_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/A02_latent_pgd_1777857827/bypass",
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/A02_latent_pgd_1777857827.md"
+  }
+}

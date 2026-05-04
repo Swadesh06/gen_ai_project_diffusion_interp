@@ -1,0 +1,13 @@
+{
+  "exp_id": "repro_saeuron_van_gogh_1777857836",
+  "task": "baseline reproduction \u2014 SAeUron",
+  "upstream": "https://github.com/cywinski/SAeUron",
+  "concept": "van_gogh",
+  "negative_scale": -3.0,
+  "device": "cpu",
+  "expected_vram_gb": 10.0,
+  "outputs": {
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/repro_saeuron_van_gogh_1777857836.md",
+    "samples_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/repro_saeuron_van_gogh_1777857836"
+  }
+}

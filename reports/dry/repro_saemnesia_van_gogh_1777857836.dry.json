@@ -1,0 +1,15 @@
+{
+  "exp_id": "repro_saemnesia_van_gogh_1777857836",
+  "task": "baseline reproduction \u2014 SAEmnesia (queued: reproduce-from-scratch)",
+  "upstream": "arXiv:2509.21379 (no public repo as of Phase 1a)",
+  "device": "cpu",
+  "expected_vram_gb": 16.0,
+  "outputs": {
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/repro_saemnesia_van_gogh_1777857836.md"
+  },
+  "TODO": [
+    "Train supervised SAE (one-to-one concept-neuron mapping) on labelled UnlearnCanvas concepts",
+    "Match Cassano et al. \u00a73 architecture: ReLU SAE w/ supervised concept loss",
+    "Compare on UnlearnCanvas accuracy + FID against SAeUron"
+  ]
+}

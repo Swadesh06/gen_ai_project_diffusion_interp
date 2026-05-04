@@ -1,0 +1,26 @@
+{
+  "exp_id": "C01_xtarget_pixel_1777857835",
+  "task": "Item 4.1 \u2014 cross-target pixel PGD",
+  "attack_space": "pixel",
+  "target_classifier": "sae_detector",
+  "config": {
+    "eps": 0.01568627450980392,
+    "n_steps": 40,
+    "lr": 0.00392156862745098,
+    "targeted": false,
+    "eps_grid": [
+      0.00784313725490196,
+      0.01568627450980392,
+      0.03137254901960784
+    ]
+  },
+  "device": "cpu",
+  "expected_vram_gb": 14.0,
+  "outputs": {
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/C01_xtarget_pixel_1777857835.md",
+    "transferability_matrix_csv": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/C01_xtarget_pixel_1777857835/xtarget_2x2.csv"
+  },
+  "pass_criteria": {
+    "off_diagonal_cell_min_bypass": 0.5
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "exp_id": "B01_detector_em_1777857834",
+  "task": "Item 3 \u2014 EM detector",
+  "config": {
+    "regime": "em",
+    "head": "linear",
+    "em_steps": 2,
+    "pool": "mean",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 64,
+    "epochs": 20,
+    "val_frac": 0.1,
+    "ckpt_every_steps": 200,
+    "keep_last_n_ckpts": 4
+  },
+  "include_adversarial": false,
+  "device": "cpu",
+  "expected_vram_gb": 4.0,
+  "co_scheduling": "GPU: ~4GB \u2014 co-locate with attack runs or SAEuron repro",
+  "pass_criteria": {
+    "auc_i2p_naive_min": 0.95,
+    "auc_i2p_adversarial_min": 0.85,
+    "auc_mma_text_min": 0.8
+  },
+  "outputs": {
+    "ckpt_dir": "/workspace/checkpoints/B01_detector_em_1777857834",
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/B01_detector_em_1777857834.md",
+    "commit_knee_plot": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/B01_detector_em_1777857834/commit_knee.png"
+  }
+}

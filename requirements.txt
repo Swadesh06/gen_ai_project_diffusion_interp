@@ -1,0 +1,44 @@
+# Pinned per Phase 1a CPU install. GPU pod must reinstall torch with the matching CUDA wheel.
+# torch CPU wheel index: https://download.pytorch.org/whl/cpu
+# torch CUDA wheel for Blackwell sm_120: see https://pytorch.org/get-started/locally/
+
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+
+diffusers==0.31.0
+transformers==4.46.3
+accelerate==1.1.1
+peft==0.13.2
+safetensors
+huggingface_hub
+datasets
+hf_transfer
+
+einops
+jaxtyping
+
+nudenet
+clean-fid
+lpips
+dreamsim
+open_clip_torch
+pytorch-fid
+
+wandb
+python-dotenv
+pyyaml
+tqdm
+
+numpy
+pandas
+scipy
+scikit-learn
+captum
+matplotlib
+seaborn
+Pillow
+
+pytest
+pytest-xdist
+ruff

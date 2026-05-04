@@ -1,0 +1,27 @@
+{
+  "exp_id": "D01_two_stage_mean_em_nudity_1777857835",
+  "task": "Item 5 \u2014 two-stage + mean patch (proposed)",
+  "regime": "em",
+  "concept": "nudity",
+  "config": {
+    "patch": "mean",
+    "gating": "on_detection",
+    "stage1_tau_ratio_percentile": 95.0,
+    "stage2_lambda_grid": [
+      100.0,
+      250.0,
+      500.0
+    ],
+    "stage2_tau_out": 0.1,
+    "benign_ref_size": 5000
+  },
+  "device": "cpu",
+  "expected_vram_gb": 8.0,
+  "outputs": {
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/D01_two_stage_mean_em_nudity_1777857835.md",
+    "feature_set_json": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/D01_two_stage_mean_em_nudity_1777857835/F_c.json"
+  },
+  "pass_criteria": {
+    "dominates_saeuron_and_dsg_on_min_metrics": 3
+  }
+}

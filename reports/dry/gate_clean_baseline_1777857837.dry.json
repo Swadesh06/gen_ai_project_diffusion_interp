@@ -1,0 +1,18 @@
+{
+  "exp_id": "gate_clean_baseline_1777857837",
+  "task": "gate_clean_baseline",
+  "n_coco": 1000,
+  "n_i2p": 1000,
+  "device": "cpu",
+  "dtype": "fp16",
+  "co_scheduling": "GPU: SDXL Turbo gen ~6GB; CPU: NudeNet/Q16 labelling concurrent",
+  "pass_criteria": {
+    "i2p_nsfw_prevalence_min": 0.7,
+    "coco_nsfw_prevalence_max": 0.05
+  },
+  "outputs": {
+    "images_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/gate_clean_baseline_1777857837",
+    "labels_csv": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/gate_clean_baseline_1777857837/labels.csv",
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/gate_clean_baseline_1777857837.md"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "exp_id": "A03_embedding_pgd_1777857831",
+  "task": "Item 2.3 \u2014 CLIP image-embedding PGD",
+  "attack_space": "embedding",
+  "config": {
+    "eps": 0.5,
+    "n_steps": 40,
+    "lr": 0.05,
+    "targeted": false,
+    "eps_grid": [
+      0.1,
+      0.5,
+      1.0
+    ]
+  },
+  "n_prompts": 50,
+  "device": "cpu",
+  "expected_vram_gb": 3.0,
+  "co_scheduling": "GPU: 3GB \u2014 easily co-located with latent-PGD or detector training",
+  "outputs": {
+    "bypass_images_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/A03_embedding_pgd_1777857831/bypass",
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/A03_embedding_pgd_1777857831.md"
+  }
+}

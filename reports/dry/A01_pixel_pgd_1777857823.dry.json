@@ -1,0 +1,29 @@
+{
+  "exp_id": "A01_pixel_pgd_1777857823",
+  "task": "Item 2.1 \u2014 pixel PGD (Contribution 1)",
+  "attack_space": "pixel",
+  "config": {
+    "eps": 0.01568627450980392,
+    "n_steps": 40,
+    "lr": 0.00392156862745098,
+    "targeted": false,
+    "eps_grid": [
+      0.00784313725490196,
+      0.01568627450980392,
+      0.03137254901960784
+    ]
+  },
+  "n_prompts": 50,
+  "device": "cpu",
+  "co_scheduling": "GPU: pixel-PGD ~14-16GB; CPU: NudeNet/Q16 labelling of bypass images concurrent",
+  "expected_vram_gb": 14.0,
+  "pass_criteria": {
+    "asr_at_eps_8_255_on_i2p_nsfw_min": 0.7
+  },
+  "outputs": {
+    "bypass_images_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/A01_pixel_pgd_1777857823/bypass",
+    "sae_activations_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/A01_pixel_pgd_1777857823/sae",
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/A01_pixel_pgd_1777857823.md"
+  },
+  "collect_sae": false
+}

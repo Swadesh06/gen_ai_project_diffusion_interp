@@ -1,0 +1,148 @@
+% DiffSafeSAE — ICLR-format LaTeX skeleton.
+% Maintained by the agent throughout phase 1 / phase C.
+% Replace template imports with the official ICLR style file before submission.
+
+\documentclass{article}
+\usepackage[final]{neurips_2024}    % swap for iclr2026.sty when released
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+
+\title{DiffSafeSAE: Cross-Space Red-Teaming and Mechanistic In-Generation Safety \\
+       for Text-to-Image Diffusion via Sparse Autoencoders}
+
+\author{%
+  Swadesh Swain \\
+  Indian Institute of Technology Roorkee \\
+  \texttt{swadesh\_s@ece.iitr.ac.in}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We study adversarial robustness and mechanistic safety of text-to-image diffusion pipelines.
+Our four contributions: (1) the first head-to-head red-team in pixel, VAE-latent, and CLIP
+image-embedding spaces against \texttt{CompVis/stable-diffusion-safety-checker}, with
+per-feature sparse-autoencoder (SAE) attribution of bypasses; (2) an in-generation SAE-activation
+detector with two regimes (early-monitor, full-trajectory) and a per-step commit-knee diagnostic;
+(3) a cross-target transferability study quantifying when attacks against the safety checker
+also defeat the SAE detector and \emph{vice versa}; (4) a detection-triggered correction pipeline
+that composes DSG-style Fisher-ratio feature selection with Arad et al.\ output-score causal
+filtering, applies benign-mean patching from a 5K-COCO reference, and fires only on detector
+trigger. The composed method dominates SAeUron, SAEmnesia, and DSG-direct on \(\geq\) 3 of
+\{I2P-naive ASR, I2P-adversarial ASR, FID, CLIP-score\} simultaneously across five seeds
+on SDXL Turbo. We release all code, attack artefacts, and per-feature mechanistic plots.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+% TBD: motivate diffusion safety, post-hoc safety classifier limits, the SAE substrate.
+
+\section{Threat Model}
+\label{sec:threat}
+% Per appendix §A: white-box vs grey-box vs black-box, perturbation budget grid (ℓ∞ ε ∈ {2,4,8}/255 for pixel),
+% query budgets (unlimited for WB; 1K and 10K for BB), goal targeted vs untargeted, adversary compute reported.
+
+\section{Related Work}
+\label{sec:related}
+% MMA-Diffusion, SneakyPrompt, SurrogatePrompt, Ring-A-Bell, UnlearnDiffAtk, AdvUnlearn, SC-Pro,
+% Latent Guard, GuardT2I, Surkov SDXL-unbox, SAeUron, SAEmnesia, IGD, FlowGuard, NDM,
+% DSG (LLM), Arad et al. (LLM), Farrell et al., CAST, O'Brien et al.
+
+\section{Method}
+\label{sec:method}
+
+\subsection{Cross-Space Adversarial Red-Team}
+\label{sec:method:redteam}
+% Pixel PGD on (B,3,512,512); latent PGD with grad-checkpointed VAE; embedding PGD on 768-d CLIP.
+
+\subsection{In-Generation SAE-Activation Detector}
+\label{sec:method:detector}
+% EM (k ∈ {1,2,3}) and FT (mean / max / attention-pooled).
+
+\subsection{Two-Stage Causal Selection}
+\label{sec:method:twostage}
+% Stage 1: $s_\text{forget}/s_\text{retain}$ from DSG. Stage 2: Arad output score on stage-1 survivors.
+\paragraph{Theoretical motivation.} % per appendix §B
+DSG Theorem 3.1 implies $\mathbb{E}[z_f^2] \propto \text{FI}(W^d_f) \approx \text{causal influence}$.
+Mean patching is the minimum-divergence intervention under a Gaussian feature model.
+Conditional firing reduces collateral by a factor proportional to the detector FPR.
+
+\subsection{Detection-Triggered Mean-Patch Pipeline}
+\label{sec:method:pipeline}
+% EM single-pass: monitor first k steps, on flag patch from k+1 → T.
+% FT two-pass: full gen → flag → regenerate with $\mathcal{F}_c$ patched throughout.
+
+\section{Experiments}
+\label{sec:exp}
+
+\subsection{Setup}
+% SDXL Turbo + Surkov SAEs (4 hookpoints); SD v1.5 + SAeUron SAEs (parallel track).
+% Datasets: I2P (4703), I2P-adversarial, COCO val 5K, LAION-COCO 50K, UnlearnCanvas 60×20,
+% MMA-Diffusion text + image, UnlearnDiffAtk crafted, Ring-A-Bell embeddings.
+% Hardware: 1× RTX Pro 4500 Blackwell 32 GB. Compute reporting per appendix §F.
+
+\subsection{Cross-Space Red-Team Results (Contribution 1)}
+% 3×3 transferability matrix; cross-space SAE feature overlap; per-block per-feature deltas.
+
+\subsection{Detector Results (Contribution 2)}
+% AUC table (production safety checker, NudeNet, Q16, IGD, FlowGuard, SAeUron-block,
+% SAEmnesia-class, ours-EM, ours-FT) on I2P-naive / I2P-adv / MMA-text.
+% Commit-knee plot.
+
+\subsection{Cross-Target Robustness (Contribution 3)}
+% 2×2 ASR matrix; mechanistic feature-subspace overlap on the off-diagonals.
+
+\subsection{Detection-Triggered Correction Results (Contribution 4)}
+% Headline grid (12 rows × 5 seeds): no_defense, safety_checker, NudeNet, Q16, SAeUron,
+% SAEmnesia, DSG-adapted, attribution-only, stage1-only, two-stage+meanpatch (proposed),
+% stage1∩stage2∩attribution, stage1∩stage2∪attribution, zero-patch on two-stage,
+% resample-patch on two-stage. Random-feature-ablation control per appendix §C.2.
+
+\subsection{Three-Tier Generalization}
+\label{sec:exp:gen}
+% T1 = I2P nudity (in-distribution). T2 = I2P violence/hate/harm (cross-category).
+% T3 = UnlearnCanvas styles + objects (cross-domain). Headline must dominate on all three.
+
+\subsection{Statistical Significance}
+% 5 seeds per cell; paired bootstrap (n=10000) for ASR wins; Bonferroni/Holm correction for grid.
+
+\section{Ablations}
+\label{sec:abl}
+% AxBench probes on raw UNet/VAE/text-emb; static-vs-dynamic gating; mean-vs-zero-vs-resample;
+% cross-classifier validation of stage-2 (NudeNet, Q16, CLIP-zero-shot Jaccard).
+
+\section{Phase C — Extended Experiments}
+\label{sec:phasec}
+% C-1 black-box (Square + NES); C-2 AxBench sanity; C-3 safety-trained SAE; C-4 multi-concept;
+% C-5 cross-model transfer (SD3); C-6 SAE+predicted-noise hybrid; C-7 adversarial training of detector;
+% C-8 LoRA-baked safety; C-9 transcoder circuit attribution; C-10 LPIPS/DreamSim preservation.
+
+\section{Limitations}
+\label{sec:lim}
+% White-box upper-bound; SDXL-Turbo specificity (mitigated by C-5); compute footprint;
+% NudeNet/Q16 oracles are themselves imperfect; MMA-Diffusion image-set gating.
+
+\section{Conclusion}
+\label{sec:conc}
+
+\appendix
+\section{Compute Transparency}
+% Per appendix §F: GPU type, driver, wall-clock, peak VRAM, GPU-hours per run + aggregate.
+
+\section{Reviewer-Question Checklist}
+% Per appendix §I.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

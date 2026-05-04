@@ -1,0 +1,24 @@
+{
+  "exp_id": "B02_detector_ft_1777857835",
+  "task": "Item 3 \u2014 FT detector",
+  "config": {
+    "regime": "ft",
+    "head": "mlp",
+    "em_steps": 2,
+    "pool": "mean",
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 64,
+    "epochs": 20,
+    "val_frac": 0.1,
+    "ckpt_every_steps": 200,
+    "keep_last_n_ckpts": 4
+  },
+  "device": "cpu",
+  "expected_vram_gb": 4.0,
+  "co_scheduling": "GPU: ~4GB \u2014 pair with EM detector training or attack run",
+  "outputs": {
+    "ckpt_dir": "/workspace/checkpoints/B02_detector_ft_1777857835",
+    "report_md": "/workspace/swadesh/gen_ai_project_diffusion_interp/reports/B02_detector_ft_1777857835.md"
+  }
+}
