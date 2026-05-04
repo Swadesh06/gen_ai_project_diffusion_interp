@@ -41,8 +41,8 @@ def main() -> int:
     print(f"  {len(prompts)} prompts")
 
     print("loading safety_checker")
-    from dsi.models.classifier_oracles import load_safety_checker
-    safety = load_safety_checker(device="cuda")
+    from dsi.detectors.baselines.safety_checker import SafetyCheckerWrapper
+    safety = SafetyCheckerWrapper(device="cuda").load()
 
     print("rendering")
     torch.cuda.reset_peak_memory_stats()
@@ -53,10 +53,8 @@ def main() -> int:
         out = pipe(prompt=p.text, num_inference_steps=args.num_inference_steps,
                    guidance_scale=7.0, generator=gen, height=512, width=512)
         img = out.images[0]
-        x = torch.tensor(np.asarray(img.convert("RGB")) / 255.0,
-                         dtype=torch.float32).permute(2, 0, 1).unsqueeze(0).to("cuda")
-        r = safety.run(x)
-        flagged = bool(r["flagged"][0])
+        scored = safety.score([img])[0]
+        flagged = bool(scored["flagged"])
         flagged_count += int(flagged)
         img.save(img_dir / f"{i:08d}.png")
         with open(img_dir / f"{i:08d}.png.safety.json", "w") as f:
