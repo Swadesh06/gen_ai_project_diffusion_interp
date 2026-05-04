@@ -20,3 +20,5 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | PHASE_1_FINAL | 2026-05-04 | all 4 contributions evidenced | keep | headline tables for Items 1-5; carry-overs for Phase C |
 | D03_stage1n2_zeropatch_n100 | 2026-05-04 | 4/10 corrected (40%) tied with D02 mean | keep | mean ≈ zero on safety_checker; FID ablation needed |
 | B02_em_oracle_v2_balanced | 2026-05-04 | va_auc 0.852, va_ap 0.356 (linear, balanced BCE) | keep | balancing brought AP up vs unbalanced 0.344 |
+| D04_stage1n2_resamplepatch_n100 | 2026-05-04 | 4/10 corrected (40%) tied with D02/D03 | keep | resample-patch matches mean/zero on safety_checker; FID arbiter pending |
+| D02_D03_D04_patch_ablation | 2026-05-04 | mean = zero = resample on safety; F_c quality dominates | keep | patch-kind ablation; FID measurements pending |
