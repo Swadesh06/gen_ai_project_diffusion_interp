@@ -18,3 +18,5 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | C01_xtarget_A01_vs_B01 | 2026-05-04 | transferability=0.000 (17/17 bypass safety, 0/17 bypass detector) | keep | Item 4 pass; off-diagonal cell at 0% — safety_checker and SAE detector monitor different feature subspaces |
 | D02_stage1n2_meanpatch_n100 | 2026-05-04 | 4/10 corrected (40%), |F_c|=69 | keep | Stage1∩Stage2 doubles correction vs Stage1-only (D01 17%); validates Stage-2 contribution |
 | PHASE_1_FINAL | 2026-05-04 | all 4 contributions evidenced | keep | headline tables for Items 1-5; carry-overs for Phase C |
+| D03_stage1n2_zeropatch_n100 | 2026-05-04 | 4/10 corrected (40%) tied with D02 mean | keep | mean ≈ zero on safety_checker; FID ablation needed |
+| B02_em_oracle_v2_balanced | 2026-05-04 | va_auc 0.852, va_ap 0.356 (linear, balanced BCE) | keep | balancing brought AP up vs unbalanced 0.344 |
