@@ -52,3 +52,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | D09_sd3_smoke | 2026-05-04 | 20 imgs, 24 MM-DiT blocks, 15.1 GB | keep | Phase D-9 SD3-medium MM-DiT (closer to FLUX); 4 hookpoints captured |
 | repro_saeuron_nudity_n30_smoke | 2026-05-04 | 33% baseline -> 43% with-saeuron (wrong feature_idx 11627=cat) | partial-keep | Item 1c-5 SAeUron pipeline integration verified; needs correct nudity feature_idx |
 | mma_diffusion_safety_baseline | 2026-05-04 | orig 7.5%, adv-gen 58% safety_checker flag | keep | newly-accessible MMA-Diffusion image set; baseline ASR table |
+| REFRAMING_DECISION | 2026-05-04 | Framing A canonical (mixed evidence) | keep | v2 §7 framing-decision moment; 4 discriminator inputs banked, paper structure committed to original four contributions |
