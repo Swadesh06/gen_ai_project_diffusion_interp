@@ -44,6 +44,9 @@ def main() -> int:
     ap.add_argument("--batch-size", type=int, default=4)
     ap.add_argument("--patch-kind", choices=["mean", "zero", "resample"], default="mean",
                     help="how to patch the F_c features (mean=benign mean, zero=null out, resample=draw from benign pool)")
+    ap.add_argument("--variant", choices=["turbo", "base"], default="turbo")
+    ap.add_argument("--num-inference-steps", type=int, default=1)
+    ap.add_argument("--guidance-scale", type=float, default=0.0)
     args = ap.parse_args()
 
     import numpy as np
@@ -66,7 +69,7 @@ def main() -> int:
     from dsi.sae.hooks import SurkovHookManager
     from dsi.sae.load import load_surkov_sae
 
-    pipe_w = SDXLPipelineWrapper(variant="turbo", device=args.device, dtype=args.dtype).load()
+    pipe_w = SDXLPipelineWrapper(variant=args.variant, device=args.device, dtype=args.dtype).load()
     saes = {hp: load_surkov_sae(hp).to(args.device).eval() for hp in feat_set}
 
     # Pre-compute per-hookpoint feat tensors and mu tensors on device
@@ -139,15 +142,15 @@ def main() -> int:
         gens = [torch.Generator(device=args.device).manual_seed(s) for s in seeds]
 
         # 1. un-intervened
-        out = pipe_w.pipe(prompt=[p.text for p in batch], num_inference_steps=1,
-                          guidance_scale=0.0, generator=gens, height=512, width=512)
+        out = pipe_w.pipe(prompt=[p.text for p in batch], num_inference_steps=args.num_inference_steps,
+                          guidance_scale=args.guidance_scale, generator=gens, height=512, width=512)
         pre_imgs = out.images
         # 2. intervened — same seeds for fair comparison
         gens2 = [torch.Generator(device=args.device).manual_seed(s) for s in seeds]
         with SurkovHookManager(pipe_w.unet, saes, capture=False, intervene_fn=intervene,
                                device=args.device):
-            out_int = pipe_w.pipe(prompt=[p.text for p in batch], num_inference_steps=1,
-                                  guidance_scale=0.0, generator=gens2, height=512, width=512)
+            out_int = pipe_w.pipe(prompt=[p.text for p in batch], num_inference_steps=args.num_inference_steps,
+                                  guidance_scale=args.guidance_scale, generator=gens2, height=512, width=512)
         post_imgs = out_int.images
 
         # 3. score both via the safety_target (matches our attack-side metric)
