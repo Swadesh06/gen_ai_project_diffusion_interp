@@ -141,3 +141,33 @@ Beyond these ten, ideas to prototype if compute remains:
 - **MMA-Diffusion image-set access** is gated. Request from https://huggingface.co/datasets/YijunYang280/MMA_Diffusion_adv_images_benchmark; until granted, the text-modality + UnlearnDiffAtk + Ring-A-Bell sets are the adversarial benchmark.
 - **SAEmnesia** has no public release as of 2026-05-04. PLAN flags it as reproduce-from-scratch: train supervised SAE on labelled UnlearnCanvas concepts at SAeUron's hookpoints, with one-to-one concept-neuron loss per Cassano et al. Until then, `scripts/repro_saemnesia.py` is a dry-run stub.
 - **DreamSim's `./models/` cache.** DreamSim hardcodes a `./models/` cache dir relative to cwd. `.gitignore` excludes `/models/` at repo root; either chdir before calling DreamSim, or set torch hub dir explicitly via `os.environ['TORCH_HOME']`.
+
+---
+
+## Phase C — autonomous-loop session 2026-05-04 PM (running)
+
+### Landed
+- C-2 (raw-vs-SAE per-block): raw all-blocks-cat AUC=1.000, SAE per-block 0.97-0.98. SAE 1-2 pp under raw on this in-distribution NSFW-vs-benign label task.
+- C-3 (safety-SAE training): 4 hookpoints, TopK x8 k=64 on 1000 mixed I2P+COCO. Trained in 30 s each.
+- C-3 detector first hookpoint: safety_sae va_auc=1.000 ties raw, beats Surkov (0.9805) by 1.95 pp. Other hookpoints in flight.
+- C-6 (hybrid raw||sae): hybrid AUC=1.0 (+0.05 pp vs raw, +1.34 pp vs sae). In-distribution saturates raw — adversarial test queued (C-6 addendum).
+- D02/D03 FID post: 235.21/235.25 vs pre 234.93. Both intervention kinds preserve image structure within < 0.5 FID.
+- gen-base 4-step: 200 SDXL Base imgs in 522 s. Safety scoring queued.
+
+### Running
+- C-2 SAE per-block + concat (CPU)
+- C-3 SAE detector for hookpoints 2-4 (CPU)
+- C-9 transcoder (CPU)
+- C-1 Square Attack 5K-query budget vs safety_checker (GPU)
+- C-6 adv-robust eval on A01 bypass set (GPU)
+- LPIPS-vgg D02/D03/D04 (CPU; slow)
+- FID-D04-post (CPU)
+- score-base-i2p (CPU)
+
+### Queued
+- LPIPS-vgg D02/D03/D04 → reports (when each lands)
+- score-base-i2p → write base-vs-turbo comparison for paper
+- Patch-LoRA (C-8) — bake the F_c intervention into a LoRA adapter
+- Multi-concept defense (C-4) — extend F_c to violence, Van Gogh
+- Cross-model transfer (C-5) — load SD3 + extract aligned activations
+
