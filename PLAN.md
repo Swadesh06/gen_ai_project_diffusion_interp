@@ -144,6 +144,81 @@ Beyond these ten, ideas to prototype if compute remains:
 
 ---
 
+## Phase 1c — session start 2026-05-04 evening (v2 + RTX PRO 6000 Blackwell)
+
+### Hardware confirmed
+- 1× RTX PRO 6000 Blackwell Workstation Edition, 96 GB VRAM, sm_120, CUDA 13.0, driver 580.126.16.
+- AMD EPYC 9355, 64 vCPU.
+- 1133 GB system RAM (substantially exceeds the 263 GB v2 spec).
+- 574 TB free disk on /workspace.
+- torch 2.11.0+cu128, sm_120 in arch list. GPU import + smoke OK.
+- All 24/24 verify_assets rows green. HF_TOKEN, WANDB_API_KEY, GEMINI_API_KEY all set.
+- Gemini fallback chain reachable; v2-spec model ids `gemini-3.1-flash-lite`, `gemini-3-flash`, `gemini-2-flash` are 404 in v1beta API. Updated chain to use `*-preview` variants and `gemini-2.0-flash` as fallback.
+
+### Pod-recovery actions on session start
+- The 36 cpu-workers from the prior session were oversubscribed (load avg 435, 1108 running processes, ~1550 s/image NudeNet+Q16 throughput on a 64-core box). All cpu-worker-* and stale `autocode` tmux sessions killed. Process count 1108 → 73 within 90 seconds.
+- Replaced with 8 sharded cpu-workers using `--shard i/8` md5-based partitioning (added to `scripts/cpu_worker.py`) so workers don't duplicate label work. NudeNet + Q16 oracle scoring continues; 2715 unlabeled PNGs in queue.
+- Restarted `monitor` with `nvidia-smi dmon -s pucvmet -d 5 > logs/gpu_monitor.log`.
+
+### Phase 1c session plan — dependency-ordered
+
+**Wave 1 (in flight on session start — 50 GB GPU footprint):**
+| tmux session | what | resource |
+|---|---|---|
+| `monitor` | nvidia-smi dmon | always-on |
+| `cpu-worker-{0..7}` | NudeNet + Q16 oracle labelling, sharded | 8 cores, ~16 GB RAM |
+| `cf-strategy1` | Item 1c-0 Strategy 1: prompt-edit pairs render (665 candidates, SDXL Base 4-step) | 14 GB GPU |
+| `cf-strategy3a` | Item 1c-0 Strategy 3 Path A: Gemini paraphrase, 25 anchors × 4 paraphrases × 4 cells × 2 concepts (=800) | 0 GB GPU, network-bound |
+| `c1-square-n500` | C-1 Square Attack n=500 q=5K seed 0 (replaces n=50 prior result) | 8 GB GPU |
+
+**Wave 2 (queued — start when wave 1 has VRAM headroom):**
+- C-3 safety-SAE training at expansion 16 (16 GB) and 32 (28 GB) parallel; sweep L0 ∈ {32, 64, 128, 256}.
+- C-9 transcoder detector at full hookpoint coverage (12 GB).
+- Item 1c-7 SDXL Base 4-step on 1000 I2P prompts (separate large run from Strategy 1 build).
+- Item 1c-0 Strategy 2: same-prompt seed pairs (100 prompts × 8 seeds, 14 GB).
+- Item 1c-0 Strategy 3 Path B: Llama 3.1 70B int8 paraphrase (40 GB).
+- C-1 Square seeds 1-4 in parallel for 5-seed CI (Item 1c-6).
+
+**Wave 3 (after counterfactual + B02-oracle-v3 land):**
+- Item 1c-1 cross-target detector bug fix (rebuild xtarget pipeline so detector consumes post-attack image's trajectory).
+- Item 1c-3 B02 oracle relabel + retrain at scale (linear, MLP-256, MLP-512, per-block, EM, FT).
+- C-2 AxBench rerun on counterfactual benchmark (the meaningful-task version).
+- Item 1c-4 UnlearnDiffAtk as primary headline migration.
+- Item 1c-5 SAeUron + DSG + SAEmnesia repros.
+
+**Wave 4 (Phase D — start as dependencies allow, in parallel with 1c work):**
+- D-1 causal feature graphs (Stage-2 survivors → attribution patching across timesteps).
+- D-2 learned-projection intervention (drop-in for mean-patch).
+- D-7 mechanistic feature-firing trajectory plot (canonical paper figure).
+- D-9 cross-arch FLUX (newly feasible at 96 GB).
+- D-4 cross-concept transfer test.
+- D-5 black-box transfer attacks across diffusion stacks.
+- D-6 joint end-to-end pipeline training.
+- D-8 adversarial training of two-stage selection.
+- D-10 compositional / multi-concept defense.
+
+### Both framings active
+- `paper/main.tex` continues as Framing A canonical working draft.
+- `paper/alt_framing_B.md` — structured outline updated as experiments land. Both stay current.
+- Framing-decision moment fires when {Item 1c-0, Item 1c-1, Item 1c-3, C-2 on counterfactual} all close.
+
+### Code added this session
+- `dsi/util/img_saving.py` — already existed (CaseRecorder); marked done.
+- `dsi/util/activation_cache.py` — RAM-resident LRU, 200 GB ceiling, dirty-flush, preload_dir. New.
+- `dsi/data/counterfactual.py` — Strategy 1 substitution dictionary (4 clusters, ~50 token regexes). Yields 665 candidate pairs from 4703 I2P prompts (14.1% match rate). New.
+- `dsi/data/paraphrase.py` — Gemini Path A with 5-model fallback. New.
+- `dsi/data/paraphrase_local.py` — Llama 3.1 70B int8 Path B. New.
+- `scripts/build_cf_strategy{1,2,3_gemini,3_llama}.py` — CF benchmark drivers. New.
+- `scripts/cpu_worker.py` — added `--shard i/n` md5-based partitioning. Modified.
+
+### v2 hardware utilisation rules locked in
+- Default state: ≥ 3 GPU + ≥ 12 CPU + monitor. (Currently 3 GPU + 8 CPU + monitor; will scale CPUs back up after wave 1 settles.)
+- VRAM target 90 % (≈ 86 GB), hard ceiling 95 % (≈ 91 GB).
+- 5-seed CIs run in parallel, never serialized.
+- All renders save the full bypass / corrected / false-positive set per Item 1c-2 (img_saving.CaseRecorder).
+
+---
+
 ## Phase C — autonomous-loop session 2026-05-04 PM (running)
 
 ### Landed

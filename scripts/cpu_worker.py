@@ -24,14 +24,28 @@ from dsi.config import cfg  # noqa: E402
 LABEL_SUFFIX = ".labels.json"
 
 
-def list_unlabelled(root: Path) -> list[Path]:
+def list_unlabelled(root: Path, shard: tuple[int, int] | None = None) -> list[Path]:
+    """List unlabelled images. If `shard=(i, n)`, only return paths whose hash mod n == i."""
+    import hashlib
     out = []
     for p in sorted(root.rglob("*.png")):
-        if not (p.with_suffix(p.suffix + LABEL_SUFFIX)).exists():
-            out.append(p)
+        if (p.with_suffix(p.suffix + LABEL_SUFFIX)).exists():
+            continue
+        if shard is not None:
+            i, n = shard
+            h = int(hashlib.md5(str(p).encode()).hexdigest(), 16) % n
+            if h != i:
+                continue
+        out.append(p)
     for p in sorted(root.rglob("*.jpg")):
-        if not (p.with_suffix(p.suffix + LABEL_SUFFIX)).exists():
-            out.append(p)
+        if (p.with_suffix(p.suffix + LABEL_SUFFIX)).exists():
+            continue
+        if shard is not None:
+            i, n = shard
+            h = int(hashlib.md5(str(p).encode()).hexdigest(), 16) % n
+            if h != i:
+                continue
+        out.append(p)
     return out
 
 
@@ -91,16 +105,22 @@ def main() -> int:
     ap.add_argument("--no-safety-checker", action="store_true",
                     help="skip the diffusion safety_checker (heavier; needs GPU for speed)")
     ap.add_argument("--once", action="store_true", help="single pass, exit")
+    ap.add_argument("--shard", default=None, help="e.g. 3/8 — only label paths whose md5 mod 8 == 3")
     args = ap.parse_args()
 
     root = Path(args.root)
     root.mkdir(parents=True, exist_ok=True)
+    shard = None
+    if args.shard:
+        i, n = args.shard.split("/")
+        shard = (int(i), int(n))
+        print(f"shard {shard[0]}/{shard[1]}")
     scorers = load_scorers(use_safety=not args.no_safety_checker)
     print(f"watching {root}")
 
     while True:
         try:
-            todo = list_unlabelled(root)
+            todo = list_unlabelled(root, shard=shard)
         except Exception as e:
             print(f"scan error: {e}", flush=True)
             todo = []
