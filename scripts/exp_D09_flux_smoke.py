@@ -40,6 +40,7 @@ def main() -> int:
     ap.add_argument("--n-i2p", type=int, default=20)
     ap.add_argument("--n-coco", type=int, default=20)
     ap.add_argument("--num-inference-steps", type=int, default=20)
+    ap.add_argument("--model-id", default="PixArt-alpha/PixArt-Sigma-XL-2-1024-MS")
     ap.add_argument("--height", type=int, default=512)
     ap.add_argument("--width", type=int, default=512)
     ap.add_argument("--seed", type=int, default=900_000_000)
@@ -58,16 +59,22 @@ def main() -> int:
     images_dir = out_dir / "images"
     images_dir.mkdir(parents=True, exist_ok=True)
 
-    print("loading PixArt-Sigma (DiT, public)", flush=True)
-    from diffusers import PixArtSigmaPipeline
+    print(f"loading {args.model_id}", flush=True)
     td = torch.bfloat16 if args.dtype == "bfloat16" else torch.float16
-    pipe = PixArtSigmaPipeline.from_pretrained(
-        "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
-        torch_dtype=td,
-    ).to(args.device)
+    if "PixArt" in args.model_id:
+        from diffusers import PixArtSigmaPipeline
+        pipe = PixArtSigmaPipeline.from_pretrained(args.model_id, torch_dtype=td).to(args.device)
+    elif "stable-diffusion-3" in args.model_id:
+        from diffusers import StableDiffusion3Pipeline
+        pipe = StableDiffusion3Pipeline.from_pretrained(args.model_id, torch_dtype=td).to(args.device)
+    elif "FLUX" in args.model_id:
+        from diffusers import FluxPipeline
+        pipe = FluxPipeline.from_pretrained(args.model_id, torch_dtype=td).to(args.device)
+    else:
+        raise ValueError(f"unknown model: {args.model_id}")
     pipe.set_progress_bar_config(disable=True)
 
-    # Discover available transformer blocks (PixArt has 28 transformer blocks)
+    # Discover available transformer blocks
     n_blocks = len(pipe.transformer.transformer_blocks)
     print(f"  FLUX transformer has {n_blocks} double-stream blocks", flush=True)
     actual_indices = [i for i in HOOKPOINT_INDICES if i < n_blocks]
@@ -116,13 +123,19 @@ def main() -> int:
                 # clear captured between batches
                 for k in captured:
                     captured[k] = []
-                out = pipe(
+                # CFG and max_sequence_length depend on model
+                pipe_kwargs = dict(
                     prompt=[p.text for p in batch],
                     num_inference_steps=args.num_inference_steps,
-                    guidance_scale=7.0,  # SD3 prefers CFG ≈ 7
                     height=args.height, width=args.width,
                     generator=gens,
                 )
+                if "FLUX" in args.model_id:
+                    pipe_kwargs["guidance_scale"] = 0.0  # FLUX schnell prefers 0
+                    pipe_kwargs["max_sequence_length"] = 256
+                else:
+                    pipe_kwargs["guidance_scale"] = 7.0
+                out = pipe(**pipe_kwargs)
                 imgs = out.images
             except Exception as e:
                 print(f"  error in batch: {type(e).__name__}: {e}", flush=True)
