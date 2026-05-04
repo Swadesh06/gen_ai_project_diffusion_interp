@@ -29,21 +29,26 @@ class SAEDetectorTarget:
         ck = torch.load(self.detector_ckpt, map_location=self.device, weights_only=False)
         sd = ck["model_state_dict"]
 
-        # Infer head type + in_dim from state dict
+        # Infer head type + in_dim from state dict (multiple training-script conventions).
         if "linear.weight" in sd:
             in_dim = sd["linear.weight"].shape[1]
             head = LinearProbe(in_dim).to(self.device)
+        elif "weight" in sd and "bias" in sd and sd["weight"].ndim == 2:
+            # raw nn.Linear (train_detector.py linear path)
+            in_dim = sd["weight"].shape[1]
+            head = torch.nn.Linear(in_dim, 1).to(self.device)
         elif "fc1.weight" in sd:
             in_dim = sd["fc1.weight"].shape[1]
             hidden = sd["fc1.weight"].shape[0]
             head = MLPHead(in_dim, hidden=hidden).to(self.device)
         elif "0.weight" in sd:
-            # nn.Sequential wrapper
+            # nn.Sequential wrapper (train_detector.py mlp path)
             in_dim = sd["0.weight"].shape[1]
             hidden = sd["0.weight"].shape[0]
-            head = MLPHead(in_dim, hidden=hidden).to(self.device)
-            sd = {"fc1.weight": sd["0.weight"], "fc1.bias": sd["0.bias"],
-                  "fc2.weight": sd["2.weight"], "fc2.bias": sd["2.bias"]}
+            head = torch.nn.Sequential(
+                torch.nn.Linear(in_dim, hidden), torch.nn.ReLU(),
+                torch.nn.Linear(hidden, 1),
+            ).to(self.device)
         else:
             raise ValueError(f"unrecognised detector state_dict keys: {list(sd)[:5]}")
         head.load_state_dict(sd)
