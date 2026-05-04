@@ -53,3 +53,6 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | repro_saeuron_nudity_n30_smoke | 2026-05-04 | 33% baseline -> 43% with-saeuron (wrong feature_idx 11627=cat) | partial-keep | Item 1c-5 SAeUron pipeline integration verified; needs correct nudity feature_idx |
 | mma_diffusion_safety_baseline | 2026-05-04 | orig 7.5%, adv-gen 58% safety_checker flag | keep | newly-accessible MMA-Diffusion image set; baseline ASR table |
 | REFRAMING_DECISION | 2026-05-04 | Framing A canonical (mixed evidence) | keep | v2 §7 framing-decision moment; 4 discriminator inputs banked, paper structure committed to original four contributions |
+| cf_probe_strategy2_sae_v1 | 2026-05-04 | in-distribution AUC 0.9412 (SAE) vs 0.9436 (raw) | keep | SAE features tie raw on Strategy 2 counterfactual, Δ = -0.24 pp; commits framing-A reading |
+| D02_D03_D04_lpips_gpu_v1 | 2026-05-04 | LPIPS-vgg = 0.413 (all three patches tied) | keep | Item 1c-8 close: patch-kind doesn't matter, F_c selection dominates LPIPS+FID |
+| D04_violence_v1 | 2026-05-04 | concat AUC = 1.000 (raw + SAE), 0 nudity-violence feature overlap | keep | Phase D-4 cross-concept; SAE features concept-specific; per-concept F_c disjoint at all 4 hookpoints |

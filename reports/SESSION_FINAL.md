@@ -51,7 +51,7 @@ prompt-substitution shortcuts.
 | D-1 causal feature graphs | DONE | 98 edges, 18 roots, 18 sinks across 4 hookpoints |
 | D-2 learned-projection intervention | DONE | per-hookpoint Pi trained (raw + sae) |
 | D-3 UnlearnDiffAtk headline | folded into Item 1c-4 | nudity 37.3%, violence 22.0% safety_checker baseline |
-| D-4 cross-concept violence | deferred | raw_violence_300 dir empty; needs render |
+| D-4 cross-concept violence | DONE | violence vs benign AUC=1.000; 0 feature overlap with nudity F_c |
 | D-5 black-box transfer attacks | pending | — |
 | D-6 joint end-to-end training | pending | — |
 | D-7 mechanistic trajectory | DONE (5 cases) | per-step SAE feature trajectory, paper-figure quality |
@@ -63,17 +63,24 @@ prompt-substitution shortcuts.
 
 | item | description | status |
 |---|---|---|
-| 1c-0 | counterfactual benchmark (3 strategies) | mostly DONE |
-| 1c-1 | detector logits bug fix | DONE |
-| 1c-2 | image-saving discipline | partial (CaseRecorder exists) |
-| 1c-3 | B02 oracle v3 retrain | DONE (AUC 0.977) |
+| 1c-0 | counterfactual benchmark (3 strategies) | DONE — Strategy 1 0.275, Strategy 2 raw 0.9436 / SAE 0.9412 |
+| 1c-1 | detector logits bug fix | DONE — 0/32 transferability |
+| 1c-2 | image-saving discipline | partial (CaseRecorder exists; per-experiment usage incomplete) |
+| 1c-3 | B02 oracle v3 retrain | DONE (AUC 0.977 linear, 0.977 MLP) |
 | 1c-4 | UnlearnDiffAtk headline migration | partial (rendered + scored, intervention pending) |
 | 1c-5 | SAeUron + DSG + SAEmnesia repros | partial (SAeUron pipeline verified, wrong feature_idx) |
-| 1c-6 | scale n + 5-seed CIs | DONE on A03 + c1-square; partial on a02 |
+| 1c-6 | scale n + 5-seed CIs | DONE on A03 + c1-square; A01+A02 in flight (s0/s1 done, s2/s3/s4 launched) |
 | 1c-7 | SDXL Base 4-step rerun | DONE (28.6% safety_checker flag, 3.4× lift) |
-| 1c-8 | FID/CLIP/LPIPS/DreamSim on D02/D03/D04 | partial (FID landed; LPIPS/CLIP killed after 3 hr no output) |
+| 1c-8 | FID/CLIP/LPIPS/DreamSim on D02/D03/D04 | DONE — LPIPS-vgg = 0.413 ± 0.07 (all three patches tied) |
 | 1c-9 | black-box attack vs SAE detector | partial (Square attack vs B02-v3, 0 bypasses found) |
 | 1c-10 | resume + scale Phase C | DONE |
+
+### Framing-decision moment
+
+Per v2 §7, all four discriminator inputs banked (Item 1c-0 cf-probe S1 +
+S2, Item 1c-1 verified, Item 1c-3 B02-v3, C-2 AxBench redux = cf-probe
+results). **Verdict: Framing A canonical** (`reports/REFRAMING_DECISION.md`).
+Mixed evidence triggers the v2 §7 safer-choice rule.
 
 ## New datasets ingested
 
