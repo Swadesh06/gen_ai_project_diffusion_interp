@@ -19,20 +19,16 @@ GPU LPIPS-vgg (`scripts/run_lpips_gpu_fast.py`, batch=8, fp32):
 The CPU LPIPS run died at 26 min with 0 progress — VGG download stalled
 serialization on CPU. The GPU rewrite completed each in 5-7 minutes.
 
-## Results
+## Results — joint LPIPS + FID + CLIP-score table (n=100 per metric)
 
-| variant | n | LPIPS-vgg mean | LPIPS-vgg std |
-|---|---|---|---|
-| **D02 mean-patch** | 100 | **0.4128** | 0.0720 |
-| **D03 zero-patch** | 100 | **0.4129** | 0.0720 |
-| **D04 resample-patch** | 100 | **0.4129** | 0.0720 |
+| variant | LPIPS-vgg | FID pre | FID post | Δ FID | CLIP-score pre | CLIP-score post | Δ CLIP |
+|---|---|---|---|---|---|---|---|
+| **D02 mean-patch** | **0.4128** | 234.93 | 235.21 | +0.28 | 0.1594 | 0.1591 | -0.0003 |
+| **D03 zero-patch** | **0.4129** | 234.93 | 235.25 | +0.33 | 0.1594 | 0.1591 | -0.0003 |
+| **D04 resample-patch** | **0.4129** | 234.93 | 235.21 | +0.28 | 0.1594 | 0.1590 | -0.0004 |
 
-The three patches produce essentially identical LPIPS distributions —
-**Δ ≤ 0.0001 mean**.
-
-Compared to FID series (Phase 1 patch-ablation):
-- D02 FID-pre = 234.93, FID-post = 235.21 (Δ = +0.28)
-- D03 FID-post = 235.25 (Δ = +0.32)
+The three patches produce essentially identical distributions across all
+three quality arbiters — **Δ ≤ 0.0001 LPIPS, ≤ 0.06 FID, ≤ 0.0001 CLIP**.
 
 ## Interpretation
 
