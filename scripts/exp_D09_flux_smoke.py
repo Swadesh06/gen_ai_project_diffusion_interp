@@ -58,16 +58,16 @@ def main() -> int:
     images_dir = out_dir / "images"
     images_dir.mkdir(parents=True, exist_ok=True)
 
-    print("loading FLUX.1-schnell", flush=True)
-    from diffusers import StableDiffusion3Pipeline
+    print("loading PixArt-Sigma (DiT, public)", flush=True)
+    from diffusers import PixArtSigmaPipeline
     td = torch.bfloat16 if args.dtype == "bfloat16" else torch.float16
-    pipe = StableDiffusion3Pipeline.from_pretrained(
-        "stabilityai/stable-diffusion-3-medium-diffusers",
+    pipe = PixArtSigmaPipeline.from_pretrained(
+        "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
         torch_dtype=td,
     ).to(args.device)
     pipe.set_progress_bar_config(disable=True)
 
-    # Discover available transformer blocks
+    # Discover available transformer blocks (PixArt has 28 transformer blocks)
     n_blocks = len(pipe.transformer.transformer_blocks)
     print(f"  FLUX transformer has {n_blocks} double-stream blocks", flush=True)
     actual_indices = [i for i in HOOKPOINT_INDICES if i < n_blocks]
