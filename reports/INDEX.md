@@ -22,3 +22,5 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | B02_em_oracle_v2_balanced | 2026-05-04 | va_auc 0.852, va_ap 0.356 (linear, balanced BCE) | keep | balancing brought AP up vs unbalanced 0.344 |
 | D04_stage1n2_resamplepatch_n100 | 2026-05-04 | 4/10 corrected (40%) tied with D02/D03 | keep | resample-patch matches mean/zero on safety_checker; FID arbiter pending |
 | D02_D03_D04_patch_ablation | 2026-05-04 | mean = zero = resample on safety; F_c quality dominates | keep | patch-kind ablation; FID measurements pending |
+| B02_em_oracle_v2_mlp_balanced | 2026-05-04 | va_auc=0.891 va_ap=0.421 (MLP-256 + balanced BCE) | keep | best oracle-relabelled detector so far; +4pp over linear |
+| FID_D02_pre_n100 | 2026-05-04 | FID=234.93 vs COCO val 5K (n=100) | partial | FID is expected high w/ Turbo 1-step + small sample; full FID series running |
