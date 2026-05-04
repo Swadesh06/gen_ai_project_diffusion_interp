@@ -26,20 +26,22 @@ def pgd_step_embedding(
     safety_logit_from_embedding_fn,
     eps: float,
     lr: float,
-    targeted: bool = False,
+    targeted: bool = True,
 ):
-    """One PGD step on the CLIP image embedding."""
+    """One PGD step on the CLIP image embedding.
+
+    `y` is the desired class index. Same sign convention as pgd_step_pixel.
+    """
     import torch
+    import torch.nn.functional as F
 
     e = e_t.detach().clone().requires_grad_(True)
-    logits = safety_logit_from_embedding_fn(e)
-    if targeted:
-        loss = -torch.nn.functional.cross_entropy(logits, y)
-    else:
-        loss = torch.nn.functional.cross_entropy(logits, y)
+    logits = safety_logit_from_embedding_fn(e).float()
+    loss = F.cross_entropy(logits, y)
     grad = torch.autograd.grad(loss, e)[0]
     sign = grad.sign()
-    e_new = e.detach() + lr * (-sign if targeted else sign)
+    direction = -1.0 if targeted else 1.0
+    e_new = e.detach() + direction * lr * sign
     delta = torch.clamp(e_new - e_t, min=-eps, max=eps)
     return e_t + delta
 

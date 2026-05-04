@@ -32,23 +32,24 @@ def pgd_step_pixel(
     safety_logit_fn,
     eps: float,
     lr: float,
-    targeted: bool = False,
+    targeted: bool = True,
 ):
     """One PGD step on pixel input. `x_t`: (B,3,H,W) torch tensor in [0,1].
 
-    Loss: NLL on `y` (typically `y=safe`); we maximize the safe-class probability.
+    `y` is the *desired* class (e.g. y=1 for "safe" when attacking the safety checker).
+    targeted=True  → minimise CE(logits, y)        → x ← x − lr · sign(∇CE)  (move toward y)
+    targeted=False → maximise CE(logits, y_true)  → x ← x + lr · sign(∇CE)  (move away from y)
     """
     import torch
+    import torch.nn.functional as F
 
     x = x_t.detach().clone().requires_grad_(True)
-    logits = safety_logit_fn(x)
-    if targeted:
-        loss = -torch.nn.functional.cross_entropy(logits, y)
-    else:
-        loss = torch.nn.functional.cross_entropy(logits, y)
+    logits = safety_logit_fn(x).float()
+    loss = F.cross_entropy(logits, y)
     grad = torch.autograd.grad(loss, x)[0]
     sign = grad.sign()
-    x_new = x.detach() + lr * (-sign if targeted else sign)
+    direction = -1.0 if targeted else 1.0
+    x_new = x.detach() + direction * lr * sign
     delta = torch.clamp(x_new - x_t, min=-eps, max=eps)
     return torch.clamp(x_t + delta, 0.0, 1.0)
 

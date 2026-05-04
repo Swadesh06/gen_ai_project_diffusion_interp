@@ -28,6 +28,44 @@ except ImportError:
 SAEBackend = Literal["surkov", "saeuron", "saemnesia"]
 
 
+class SurkovTopKSAE(nn.Module):
+    """Faithful replica of Surkov et al.'s TopK SAE (SDXL-unbox).
+
+    Schema (from sdxl-unbox/SAE/sae.py):
+      latents = relu(topk(encoder(x - pre_bias) + latent_bias, k))
+      recons  = decoder(latents) + pre_bias
+    State dict keys: encoder.weight (n_dirs, d_model), decoder.weight (d_model, n_dirs),
+    pre_bias (d_model,), latent_bias (n_dirs,), stats_last_nonzero (n_dirs,) buffer.
+    """
+
+    def __init__(self, d_in: int, d_hidden: int, *, k: int = 10):
+        if torch is None:
+            raise ImportError("PyTorch required")
+        super().__init__()
+        self.d_in = d_in
+        self.d_hidden = d_hidden
+        self.k = k
+        self.encoder = nn.Linear(d_in, d_hidden, bias=False)
+        self.decoder = nn.Linear(d_hidden, d_in, bias=False)
+        self.pre_bias = nn.Parameter(torch.zeros(d_in))
+        self.latent_bias = nn.Parameter(torch.zeros(d_hidden))
+        self.register_buffer("stats_last_nonzero", torch.zeros(d_hidden, dtype=torch.long))
+
+    def encode(self, x):
+        latents_pre_act = self.encoder(x - self.pre_bias) + self.latent_bias
+        vals, inds = torch.topk(latents_pre_act, k=self.k, dim=-1)
+        latents = torch.zeros_like(latents_pre_act)
+        latents.scatter_(-1, inds, F.relu(vals))
+        return latents
+
+    def decode(self, z):
+        return self.decoder(z) + self.pre_bias
+
+    def forward(self, x):
+        z = self.encode(x)
+        return self.decode(z), z
+
+
 @dataclass
 class SAEConfig:
     d_in: int
@@ -81,14 +119,52 @@ class SparseAutoencoder(nn.Module):
         return x_hat, z
 
 
-def load_surkov_sae(hookpoint: str, root: Path | str | None = None) -> SparseAutoencoder:
-    """Load one of Surkov et al.'s SDXL Turbo SAEs.
+def load_surkov_sae(hookpoint: str, root: Path | str | None = None):
+    """Load one of Surkov et al.'s SDXL Turbo TopK SAEs (sdxl-unbox).
 
     `hookpoint` ∈ {"down.2.1", "mid.0", "up.0.0", "up.0.1"}.
-    Looks for a state-dict at `root/<hookpoint>.safetensors` or `<hookpoint>.pt`.
+    Returns a `SurkovTopKSAE` (matches their pre_bias / latent_bias / topk semantics).
+    The companion `mean.pt` and `std.pt` files at the same dir are NOT applied here —
+    they are normalisation stats for the input residual, applied at hook time
+    (see `dsi.sae.hooks.SurkovHookManager`).
     """
+    if torch is None:
+        raise ImportError("PyTorch required")
     base = Path(root) if root else cfg.paths.sae_root / "surkov"
-    return _load_from_dir(base, hookpoint, backend="surkov")
+    path = _resolve_checkpoint_path(base, hookpoint, backend="surkov")
+    sd = torch.load(path, map_location="cpu", weights_only=False)
+    if isinstance(sd, dict) and "state_dict" in sd:
+        sd = sd["state_dict"]
+    enc_w = sd["encoder.weight"]
+    d_hidden, d_in = enc_w.shape
+    cfg_path = path.parent / "config.json"
+    k = 10
+    if cfg_path.exists():
+        try:
+            import json
+
+            k = int(json.loads(cfg_path.read_text()).get("k", 10))
+        except Exception:
+            pass
+    sae = SurkovTopKSAE(d_in=d_in, d_hidden=d_hidden, k=k)
+    sae.load_state_dict(sd, strict=False)
+    return sae
+
+
+def load_surkov_norm(hookpoint: str, root: Path | str | None = None) -> tuple:
+    """Companion mean/std for Surkov SAE input normalisation.
+
+    Returns (mean, std) torch.Tensors of shape (d_in,) (or None if missing).
+    """
+    if torch is None:
+        raise ImportError("PyTorch required")
+    base = Path(root) if root else cfg.paths.sae_root / "surkov"
+    path = _resolve_checkpoint_path(base, hookpoint, backend="surkov")
+    mu_path = path.parent / "mean.pt"
+    std_path = path.parent / "std.pt"
+    mu = torch.load(mu_path, map_location="cpu", weights_only=False) if mu_path.exists() else None
+    sd = torch.load(std_path, map_location="cpu", weights_only=False) if std_path.exists() else None
+    return mu, sd
 
 
 def load_saeuron_sae(hookpoint: str, root: Path | str | None = None) -> SparseAutoencoder:

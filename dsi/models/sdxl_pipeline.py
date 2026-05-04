@@ -27,20 +27,32 @@ class SDXLPipelineWrapper:
     def model_id(self) -> str:
         return cfg.model.sdxl_turbo if self.variant == "turbo" else cfg.model.sdxl_base
 
-    def load(self):
+    def load(self, fp16_safe_vae: str = "madebyollin/sdxl-vae-fp16-fix"):
+        """Load SDXL Turbo / Base. The standard SDXL VAE overflows in fp16 (well-known issue);
+        when `dtype='fp16'` we swap it for `madebyollin/sdxl-vae-fp16-fix` (a numerically safe
+        fp16 retrain). Pass `fp16_safe_vae=""` to keep the original VAE.
+        """
         import torch
-        from diffusers import AutoPipelineForText2Image, StableDiffusionXLPipeline
+        from diffusers import AutoencoderKL, AutoPipelineForText2Image, StableDiffusionXLPipeline
+
+        td = torch.float16 if self.dtype == "fp16" else torch.float32
+        kwargs = dict(torch_dtype=td)
+        if self.dtype == "fp16":
+            kwargs["variant"] = "fp16"
 
         if self.variant == "turbo":
-            self.pipe = AutoPipelineForText2Image.from_pretrained(
-                self.model_id, torch_dtype=torch.float16 if self.dtype == "fp16" else torch.float32,
-                variant="fp16" if self.dtype == "fp16" else None,
-            ).to(self.device)
+            self.pipe = AutoPipelineForText2Image.from_pretrained(self.model_id, **kwargs).to(self.device)
         else:
-            self.pipe = StableDiffusionXLPipeline.from_pretrained(
-                self.model_id, torch_dtype=torch.float16 if self.dtype == "fp16" else torch.float32,
-                variant="fp16" if self.dtype == "fp16" else None,
-            ).to(self.device)
+            self.pipe = StableDiffusionXLPipeline.from_pretrained(self.model_id, **kwargs).to(self.device)
+
+        if self.dtype == "fp16" and fp16_safe_vae:
+            try:
+                vae = AutoencoderKL.from_pretrained(fp16_safe_vae, torch_dtype=td).to(self.device)
+                self.pipe.vae = vae
+            except Exception as e:
+                print(f"[sdxl] fp16-safe VAE swap failed ({e}); upcasting original VAE to fp32 instead")
+                self.pipe.vae.to(torch.float32)
+
         if self.device == "cuda":
             self.pipe.set_progress_bar_config(disable=True)
         return self

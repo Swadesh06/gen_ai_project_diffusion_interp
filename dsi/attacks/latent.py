@@ -24,21 +24,20 @@ def pgd_step_latent(
     safety_logit_fn,
     eps: float,
     lr: float,
-    targeted: bool = False,
+    targeted: bool = True,
 ):
-    """One PGD step in latent space. `decode_fn(z) -> image`, gradient flows through it."""
+    """One PGD step in latent space. `decode_fn(z) → image (B,3,H,W) in [0,1])`."""
     import torch
+    import torch.nn.functional as F
 
     z = z_t.detach().clone().requires_grad_(True)
     img = decode_fn(z)
-    logits = safety_logit_fn(img)
-    if targeted:
-        loss = -torch.nn.functional.cross_entropy(logits, y)
-    else:
-        loss = torch.nn.functional.cross_entropy(logits, y)
+    logits = safety_logit_fn(img).float()
+    loss = F.cross_entropy(logits, y)
     grad = torch.autograd.grad(loss, z)[0]
     sign = grad.sign()
-    z_new = z.detach() + lr * (-sign if targeted else sign)
+    direction = -1.0 if targeted else 1.0
+    z_new = z.detach() + direction * lr * sign
     delta = torch.clamp(z_new - z_t, min=-eps, max=eps)
     return z_t + delta
 
