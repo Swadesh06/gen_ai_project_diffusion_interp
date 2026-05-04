@@ -16,3 +16,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | D01_stage1only_meanpatch_n50 | 2026-05-04 | 1/6 corrected (17%), no FID-side fallout | partial-keep | pipeline wired; Stage-1-only F_c too noisy → need Stage-1∩Stage-2 |
 | stage2_up01 (smoke) | 2026-05-04 | top |Δ| = 0.014 on 32 features | partial-keep | causal scoring works; small Δ at up.0.1 with λ=250, Q16 oracle |
 | C01_xtarget_A01_vs_B01 | 2026-05-04 | transferability=0.000 (17/17 bypass safety, 0/17 bypass detector) | keep | Item 4 pass; off-diagonal cell at 0% — safety_checker and SAE detector monitor different feature subspaces |
+| D02_stage1n2_meanpatch_n100 | 2026-05-04 | 4/10 corrected (40%), |F_c|=69 | keep | Stage1∩Stage2 doubles correction vs Stage1-only (D01 17%); validates Stage-2 contribution |
