@@ -29,3 +29,8 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | FID_D03_post_n100 | 2026-05-04 | post=235.25 (Δpre=+0.32) | keep | zero-patch FID delta within 0.05 of mean |
 | C03_safety_sae_v1 | 2026-05-04 | recon_mse 0.09-0.23 4 hookpoints | keep | TopK x8 k=64 on 1000 mixed I2P+COCO; first-hp probe AUC=1.0 ties raw |
 | base_i2p_4step_n200 | 2026-05-04 | 200 imgs, 522s, 7.6GB peak | keep | SDXL Base 4-step CFG=7.5; safety scoring queued |
+| C09_transcoder_v2 | 2026-05-04 | up.0.0→up.0.1 AUC=0.991 (3 hookpoint pairs) | keep | C-9 redux on new GPU; transcoder reconstruction error as detector signal, AUC 0.96-0.99 |
+| C03_safety_sae_v2_expansion16_32 | 2026-05-04 | 8 SAEs trained × 4 hookpoints × {16,32} expansion | keep | mid.0 best recon=0.119 at x16k64; L0 sweep follow-up shows k=32 even better at 0.104 |
+| cf_strategy3a_gemini_v1 | 2026-05-04 | 400 rows, 0 refusals on gemini-3.1-flash-lite-preview | keep | Item 1c-0 Strategy 3 Path A; cheapest model handles all unsafe cells, 1200 paraphrases |
+| C01_xtarget_v2_A01_vs_B01 | 2026-05-04 | 0/17 detector bypass; 0 identical logits | keep | Item 1c-1 fix; image-conditioned UNet trace fixes the bit-identical bug, original conclusion holds |
+| C03_safety_sae_v2_detector | 2026-05-04 | concat MLP AUC=1.000 (vs raw 1.000, surkov 0.985) | keep | safety SAE v2 closes the v1 1.21 pp gap; all L0 configs tied at 1.000 |

@@ -57,14 +57,29 @@ class SAEDetectorTarget:
         self.in_dim = in_dim
         return self
 
+    def _ensure_empty_embeds(self, B: int, device, dtype):
+        """Cache empty-prompt SDXL conditioning (prompt_embeds, pooled, time_ids)."""
+        if getattr(self, "_empty_embeds", None) is not None:
+            pe, pp, ti = self._empty_embeds
+            if pe.shape[0] >= B:
+                return pe[:B], pp[:B], ti[:B]
+        pe, neg_pe, pooled, neg_pooled = self.pipe_w.pipe.encode_prompt(
+            prompt=[""] * B, prompt_2=[""] * B,
+            device=device, num_images_per_prompt=1,
+            do_classifier_free_guidance=False,
+        )
+        import torch
+        time_ids = torch.tensor([[512, 512, 0, 0, 512, 512]] * B,
+                                device=device, dtype=dtype)
+        self._empty_embeds = (pe, pooled, time_ids)
+        return pe, pooled, time_ids
+
     def x_to_logit(self, x_in_01):
         """(B,3,H,W) in [0,1] → 1-vec safe/unsafe logit (single scalar per image).
 
-        Runs SDXL Turbo 1-step text-cond gen but starting from `x_in_01` as the
-        text-conditioned VAE-encoded latent. NB: this is approximate — for a real
-        Item 4 attack we should monkey-patch the pipeline to take the seed image
-        and run only the residual step. For now we use a simpler proxy: hook the
-        UNet on a single forward pass over the encoded x.
+        Runs a single SDXL UNet forward pass on the VAE-encoded image at low noise
+        with empty prompt conditioning, captures SAE features through
+        SurkovHookManager, and feeds them to the trained detector head.
         """
         import torch
 
@@ -72,24 +87,22 @@ class SAEDetectorTarget:
             raise ValueError("SAEDetectorTarget needs pipe_w + sae_dict; pass before load()")
         from dsi.sae.hooks import SurkovHookManager
 
+        vae_dtype = next(self.pipe_w.vae.parameters()).dtype
         scale = float(getattr(self.pipe_w.vae.config, "scaling_factor", 0.13025))
         z = self.pipe_w.vae.encode(
-            (x_in_01.to(next(self.pipe_w.vae.parameters()).dtype) * 2 - 1)
+            (x_in_01.to(vae_dtype) * 2 - 1)
         ).latent_dist.sample() * scale
 
-        # 1-step UNet forward at t=999 with empty cross-attn (cond/uncond fused)
         unet = self.pipe_w.unet
+        unet_dtype = next(unet.parameters()).dtype
+        z = z.to(unet_dtype)
+        B = z.shape[0]
+        prompt_embeds, pooled, time_ids = self._ensure_empty_embeds(B, z.device, unet_dtype)
+
         with SurkovHookManager(unet, self.sae_dict, capture=True, keep_inputs=False) as mgr:
-            # call UNet directly with a placeholder timestep + empty embeds
-            B = z.shape[0]
-            t = torch.full((B,), 999, device=z.device, dtype=torch.long)
-            # SDXL needs added_cond_kwargs etc.; this is a placeholder. Phase 1b
-            # extension: pass actual prompt embeddings if we want gradient through
-            # text-conditional path.
-            try:
-                unet(z, t).sample
-            except Exception:
-                pass
+            t = torch.full((B,), 50, device=z.device, dtype=torch.long)
+            added = {"text_embeds": pooled, "time_ids": time_ids}
+            unet(z, t, encoder_hidden_states=prompt_embeds, added_cond_kwargs=added).sample
         feats = []
         for hp in sorted(self.sae_dict.keys()):
             zs = mgr.captured[hp].z
