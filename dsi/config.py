@@ -16,6 +16,12 @@ from dotenv import load_dotenv
 REPO_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(REPO_ROOT / ".env", override=False)
 
+# TRANSFORMERS_CACHE is deprecated and, if set to the HF_HOME root (a common typo
+# in this project's .bashrc), causes diffusers/transformers to look one directory
+# above the actual `hub/` cache and fail with `local_files_only=True`. We strip it
+# here so HF_HOME (or HF_HUB_CACHE if set) is the single source of truth.
+os.environ.pop("TRANSFORMERS_CACHE", None)
+
 
 def _env_path(key: str, default: str) -> Path:
     return Path(os.environ.get(key, default)).expanduser().resolve()

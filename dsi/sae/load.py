@@ -177,49 +177,59 @@ def _load_from_dir(base: Path, hookpoint: str, backend: SAEBackend) -> SparseAut
 
 
 def _normalize_state_dict(sd: dict, backend: SAEBackend) -> dict:
-    """Map per-backend key conventions to the unified {W_enc, b_enc, W_dec, b_dec, threshold} schema."""
-    out = {}
-    KEY_MAP = {
-        "surkov": {
-            "encoder.weight": "W_enc",
-            "encoder.bias": "b_enc",
-            "decoder.weight": "W_dec",
-            "decoder.bias": "b_dec",
-        },
-        "saeuron": {
-            "W_enc": "W_enc",
-            "b_enc": "b_enc",
-            "W_dec": "W_dec",
-            "b_dec": "b_dec",
-            "threshold": "threshold",
-        },
-        "saemnesia": {
-            "W_enc": "W_enc",
-            "b_enc": "b_enc",
-            "W_dec": "W_dec",
-            "b_dec": "b_dec",
-        },
-    }
-    keymap = KEY_MAP[backend]
+    """Map per-backend key conventions to the unified {W_enc, b_enc, W_dec, b_dec, threshold} schema.
+
+    Unified schema: W_enc is (d_in, d_hidden); W_dec is (d_hidden, d_in); biases are (d_hidden,)
+    and (d_in,). Different backends serialize encoder.weight in PyTorch nn.Linear convention
+    (out, in); we transpose to (d_in, d_hidden) here.
+    """
+    out: dict = {}
+
+    def put_enc_weight(v):
+        if v.ndim == 2 and v.shape[0] != v.shape[1]:
+            out["W_enc"] = v.T if v.shape[0] > v.shape[1] else v
+        else:
+            out["W_enc"] = v
+
+    def put_dec_weight(v):
+        if v.ndim == 2 and v.shape[0] != v.shape[1]:
+            out["W_dec"] = v if v.shape[0] > v.shape[1] else v.T
+        else:
+            out["W_dec"] = v
+
     for k_src, v in sd.items():
-        if k_src in keymap:
-            out[keymap[k_src]] = v
-            continue
-        # Heuristic fallbacks for the common variants we have not pinned.
         kl = k_src.lower()
-        if "enc" in kl and "weight" in kl:
-            out["W_enc"] = v if v.shape[0] >= v.shape[1] else v.T
-        elif "enc" in kl and "bias" in kl:
+        if "thresh" in kl or kl == "log_threshold":
+            out["threshold"] = v if "log_threshold" not in kl else v.exp()
+            continue
+        if kl in ("encoder.weight", "w_enc"):
+            put_enc_weight(v)
+            continue
+        if kl in ("encoder.bias", "b_enc"):
             out["b_enc"] = v
-        elif "dec" in kl and "weight" in kl:
-            out["W_dec"] = v if v.shape[0] <= v.shape[1] else v.T
-        elif "dec" in kl and "bias" in kl:
+            continue
+        if kl in ("decoder.weight", "w_dec"):
+            put_dec_weight(v)
+            continue
+        if kl in ("decoder.bias", "b_dec"):
             out["b_dec"] = v
-        elif "thresh" in kl:
-            out["threshold"] = v
-    if "W_enc" not in out:
-        raise ValueError(f"Could not map state dict to W_enc for backend={backend}; saw {sorted(sd.keys())[:8]}")
-    if out["W_enc"].dim() == 2 and "W_dec" in out and out["W_dec"].dim() == 2:
-        if out["W_enc"].shape[0] < out["W_enc"].shape[1]:
-            pass
+            continue
+        if "enc" in kl and ("weight" in kl or kl.endswith(".w")):
+            put_enc_weight(v)
+            continue
+        if "enc" in kl and "bias" in kl:
+            out["b_enc"] = v
+            continue
+        if "dec" in kl and ("weight" in kl or kl.endswith(".w")):
+            put_dec_weight(v)
+            continue
+        if "dec" in kl and "bias" in kl:
+            out["b_dec"] = v
+            continue
+
+    if "W_enc" not in out or "W_dec" not in out:
+        raise ValueError(
+            f"Could not map state dict to W_enc/W_dec for backend={backend}; "
+            f"saw {sorted(sd.keys())[:12]}"
+        )
     return out

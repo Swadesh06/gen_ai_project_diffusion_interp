@@ -192,12 +192,13 @@ def chk_coco_captions() -> str:
 
 
 def chk_laion_coco() -> str:
+    """LAION-COCO is gated upstream; loader falls back to COCO val captions (~25K)."""
     from dsi.data.laion_coco import load_laion_coco
 
     rows = load_laion_coco(limit=50000)
     if len(rows) < 10000:
-        raise AssertionError(f"laion-coco has {len(rows)} rows, expected >= 10000")
-    return f"captions={len(rows)}"
+        raise AssertionError(f"laion-coco fallback has {len(rows)} rows, expected >= 10000")
+    return f"prompts={len(rows)} (source: {rows[0].source if rows else 'n/a'})"
 
 
 def chk_unlearncanvas_layout() -> str:
