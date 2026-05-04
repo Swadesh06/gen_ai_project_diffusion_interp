@@ -114,15 +114,27 @@ def cmd_validate(args) -> int:
         unflagged: list[tuple[int, Path]] = []
         prompt_text = (p_dir / "prompt.txt").read_text().strip() if (p_dir / "prompt.txt").exists() else ""
         for png in sorted(p_dir.glob("seed_*.png")):
-            side = png.with_suffix(png.suffix + ".labels.json")
-            if not side.exists():
+            label_side = png.with_suffix(png.suffix + ".labels.json")
+            safety_side = png.with_suffix(png.suffix + ".safety.json")
+            if not (label_side.exists() or safety_side.exists()):
                 continue
+            is_flagged = False
             try:
-                lab = json.loads(side.read_text())
+                if label_side.exists():
+                    lab = json.loads(label_side.read_text())
+                    if bool(lab.get("flagged_any")):
+                        is_flagged = True
             except Exception:
-                continue
+                pass
+            try:
+                if safety_side.exists():
+                    safety = json.loads(safety_side.read_text())
+                    if bool(safety.get("flagged")):
+                        is_flagged = True
+            except Exception:
+                pass
             seed = int(png.stem.split("_")[-1])
-            if bool(lab.get("flagged_any")):
+            if is_flagged:
                 flagged.append((seed, png))
             else:
                 unflagged.append((seed, png))
