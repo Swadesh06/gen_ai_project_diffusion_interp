@@ -131,3 +131,15 @@ Beyond these ten, ideas to prototype if compute remains:
 - Every long-running thing goes in `tmux`. Logs to `logs/<name>.log`. WandB project = `dsi-v1`.
 - Commit + push after every meaningful step. SSH remote = `git@github.com:Swadesh06/gen_ai_project_diffusion_interp.git`.
 - No emojis, no superlatives, no fluff in any committed text. Direct + plain.
+
+---
+
+## Open ops items for Phase 1b first hour
+
+- **Create the GitHub repo.** Phase 1a tried `git push -u origin main` and got "Repository not found" — the empty repo at `Swadesh06/gen_ai_project_diffusion_interp` does not exist yet. Only the SSH key was on the box; no GitHub PAT was available, so `gh repo create` could not run unattended. Fix one of two ways before anything else in Phase 1b:
+  - Via web UI: https://github.com/new → owner `Swadesh06`, name `gen_ai_project_diffusion_interp`, **do not** initialise with README/license/.gitignore (the local repo already has them), then `cd /workspace/swadesh/gen_ai_project_diffusion_interp && git push -u origin main`.
+  - Via `gh`: `gh auth login -h github.com -p ssh -s repo` (needs a one-time browser code), then `gh repo create Swadesh06/gen_ai_project_diffusion_interp --private --source . --remote origin --push`.
+  - Mark private until first paper draft if the agent generates NSFW figures (per CLAUDE.md §13).
+- **Repack the env after installing the GPU torch wheel.** The Phase 1a packed env at `/workspace/env-archives/dsi.tar.gz` carries the CPU torch wheel; without a repack the next pod restores the CPU build.
+- **Q16 weights wiring.** The `dsi.detectors.baselines.q16.Q16Wrapper` is currently a stub returning safe; obtain Schramowski et al.'s Q16 ViT classifier weights and wire `score_image()` before any final ASR-with-oracle numbers go in the paper.
+- **MMA-Diffusion image-set access** is gated. Request from https://huggingface.co/datasets/YijunYang280/MMA_Diffusion_adv_images_benchmark; until granted, the text-modality + UnlearnDiffAtk + Ring-A-Bell sets are the adversarial benchmark.
