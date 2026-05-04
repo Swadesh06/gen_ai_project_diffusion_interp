@@ -97,6 +97,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--data-dir", default="outputs/dataset_axbench_v1")
     ap.add_argument("--safety-sae-base", default="outputs/safety_saes_v1")
+    ap.add_argument("--sae-suffix", default="x8_k64",
+                    help="suffix used in safety_sae_<hp>_<suffix>/ directory naming")
     ap.add_argument("--out-dir", default="outputs/dataset_axbench_v1")
     ap.add_argument("--epochs", type=int, default=20)
     ap.add_argument("--device", default="cpu")
@@ -117,7 +119,7 @@ def main() -> int:
         if not Xraw_p.exists():
             continue
         Xraw = np.load(Xraw_p); Xsae_surkov = np.load(Xsae_p)
-        sae_dir = sae_base / f"safety_sae_{hp_us}_x8_k64"
+        sae_dir = sae_base / f"safety_sae_{hp_us}_{args.sae_suffix}"
         sd, d_in, d_hidden, k = load_safety_sae(sae_dir)
         print(f"\n=== {hp} ===  raw ({Xraw.shape}) -> safety_sae (D={d_hidden}, k={k})")
         z_safe = encode_topk(Xraw, sd, d_in, d_hidden, k)
