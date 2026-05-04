@@ -32,8 +32,17 @@ Stand up the full CPU-runnable scaffold for DiffSafeSAE so that the next session
 
 ## Results
 - 66/66 CPU tests pass.
-- Asset matrix: see `logs/verify_assets.json`. Per-row pass/fail printed at end of `scripts/verify_assets.py`. Full green confirmed before this session ended.
-- Disk usage: ~115 GB on `/workspace/.cache/huggingface/hub/`, ~3.7 GB on `/workspace/datasets/`, ~850 MB on `/workspace/checkpoints/saes/`. >50 GB headroom remaining.
+- Asset matrix: 24/24 rows pass — see `logs/verify_assets.json` for full breakdown.
+  Models: sdxl-turbo, sdxl-base, sd v1.5, safety_checker, clip-vit-large all loadable
+  with `local_files_only=True`. SAEs: Surkov down.2.1/mid.0/up.0.0/up.0.1 (d_in=1280, d_hidden=5120);
+  SAeUron up.1.1/up.1.2 (d_in=1280, d_hidden=20480). Datasets: i2p=4703, i2p-adv=1104,
+  coco val=5000 images / 25014 captions, laion-coco fallback=25014 (coco-substituted),
+  unlearncanvas=38 styles in fast scan (full 60 once 100% of shards lands), mma_text+unlearndiff
+  reachable. Oracles: nudenet, q16 (ViT-L-14 prompts shape (2,768)), lpips identity ~0,
+  dreamsim loadable.
+- Disk usage: ~140 GB on `/workspace/.cache/huggingface/hub/`, ~85 GB on `/workspace/datasets/`,
+  ~850 MB on `/workspace/checkpoints/saes/`, ~672 MB packed env at `/workspace/env-archives/dsi.tar.gz`.
+  >580 TB headroom remaining on `/workspace`.
 
 ## Interpretation
 The Phase 1a scaffold is complete. Every module has a typed signature; every script has a working `--dry-run`; every primitive that can be tested without a GPU is unit-tested. The SAE loader knows how to map the four Surkov hookpoint short-names (`down.2.1` etc.) to the on-disk checkpoint folder names (`unet.down_blocks.2.attentions.1_k10_hidden5120_..._lr0.0001/final/state_dict.pth`). The detector training loop fully implements CLAUDE.md §7 (rolling-deque keep-N, best.pt by metric, `--resume latest` with bit-identical RNG restoration). WandB init, env-var-loaded `cfg`, and standard tags are in place.

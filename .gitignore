@@ -46,6 +46,13 @@ outputs/
 datasets/
 data_local/
 
+# stray model-cache dirs (DreamSim, torch.hub default to ./models in cwd)
+/models/
+**/dreamsim_models/
+
+# claude code internal session state
+.claude/
+
 # editor / OS
 .vscode/
 .idea/

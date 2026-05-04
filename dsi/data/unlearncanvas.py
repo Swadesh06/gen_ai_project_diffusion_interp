@@ -44,9 +44,9 @@ def list_styles() -> list[str]:
         import pandas as pd
 
         styles: set[str] = set()
-        # Sample up to 30 shards (the full dataset spans 153 shards; 30 is enough to
-        # cover all 60 styles assuming roughly balanced shuffling). Early-out at 60.
-        for p in _list_parquets()[:30]:
+        # Shards are alphabetically ordered by style. Scan until we've seen 60 distinct
+        # styles or we run out of shards. Cap absolute work at 300 shards as a safety net.
+        for p in _list_parquets()[:300]:
             try:
                 df = pd.read_parquet(p, columns=["text"])
             except Exception:

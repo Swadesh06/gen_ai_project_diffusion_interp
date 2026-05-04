@@ -231,6 +231,19 @@ def chk_nudenet_smoke() -> str:
     return "loaded"
 
 
+def chk_q16_smoke() -> str:
+    from PIL import Image
+
+    from dsi.detectors.baselines.q16 import Q16Wrapper
+
+    q = Q16Wrapper(device="cpu").load()
+    img = Image.new("RGB", (224, 224), color=(0, 0, 0))
+    r = q.score_image(img)
+    if r["class_index"] not in (0, 1):
+        raise AssertionError(f"q16 returned bad class index: {r}")
+    return f"prompts={tuple(q.prompts.shape)} cls0_score={r['score']:.3f}"
+
+
 def chk_lpips_smoke() -> str:
     import lpips
     import torch
@@ -293,6 +306,7 @@ def main() -> int:
 
     # classifier oracles
     run_check("oracle: nudenet loads",  chk_nudenet_smoke, mat)
+    run_check("oracle: q16 loads + scores", chk_q16_smoke, mat)
     run_check("oracle: lpips identity", chk_lpips_smoke, mat)
     run_check("oracle: dreamsim loads", chk_dreamsim_smoke, mat)
 
