@@ -8,19 +8,19 @@
 
 | item | description | status | evidence |
 |---|---|---|---|
-| 1c-0 Strategy 1 | prompt-edit pair build | **in flight** (380/665 rendered) | `outputs/cf_benchmark_v1/`, `dsi/data/counterfactual.py` |
-| 1c-0 Strategy 2 | same-prompt seed pairs | **in flight** (684/800 rendered) | `outputs/cf_benchmark_v1_seed/` |
+| 1c-0 Strategy 1 | prompt-edit pair build | **DONE** (665 rendered, 596 BOTH-labelled, 63 validated) | `reports/cf_strategy1_render.md`, `reports/cf_probe_strategy1_v1.md` |
+| 1c-0 Strategy 2 | same-prompt seed pairs | **DONE** (800 rendered, 246 validated) | `reports/cf_strategy2_seed_pairs.md`, `reports/cf_probe_strategy2_v1.md` |
 | 1c-0 Strategy 3 Path A | Gemini paraphrase | **DONE** | `reports/cf_strategy3a_gemini_v1.md`, 400 rows / 0 refusals |
-| 1c-0 Strategy 3 Path B | local-LLM paraphrase | **in flight** (Qwen 32B downloading; Llama 70B is gated) | logs/cf-strategy3b-32b.log |
+| 1c-0 Strategy 3 Path B | local-LLM paraphrase | **abandoned** (Llama 70B gated; Qwen 14B/32B/72B int8 all OOM with bitsandbytes dispatch) | — |
 | 1c-1 | bit-identical detector logits bug fix | **DONE** | `reports/C01_xtarget_v2_A01_vs_B01.md`, `scripts/eval_xtarget_transfer_v2.py` |
 | 1c-2 | image-saving discipline | **partial** (CaseRecorder exists, not yet retrofitted on every script) | `dsi/util/img_saving.py` |
 | 1c-3 | B02 oracle relabel + retrain at scale | **DONE** | `reports/B02_oracle_v3_detector.md`, AUC 0.977 |
-| 1c-4 | UnlearnDiffAtk as primary headline | **in flight** (render driver written, run starting) | `scripts/eval_unlearndiffatk.py` |
-| 1c-5 | SAeUron + DSG + SAEmnesia repros | pending (substantial) | — |
-| 1c-6 | scale n + 5-seed CIs | **partial** (c1-square n=500 seed 0 in flight) | `outputs/C01_square_n500_q5k_seed0/` |
-| 1c-7 | SDXL Base 4-step rerun | **in flight** (763/1000 rendered) | `outputs/base_i2p_4step_n1000/` |
-| 1c-8 | FID/CLIP/LPIPS/DreamSim on D02/D03/D04 | pending (Phase 1 result is mean=zero=resample) | — |
-| 1c-9 | black-box attack vs SAE detector | **in flight** (Square attack vs B02-v3) | `outputs/C01_square_vs_B02v3_n50_q1k/` |
+| 1c-4 | UnlearnDiffAtk as primary headline | **partial** (rendered + scored: nudity 37.3%, violence 22%; intervention pending) | `reports/udatk_safety_scores.md` |
+| 1c-5 | SAeUron + DSG + SAEmnesia repros | **partial** (SAeUron streamlined repro 23/30 done; DSG/SAEmnesia pending) | `outputs/repro_saeuron_nudity_n30_smoke/` |
+| 1c-6 | scale n + 5-seed CIs | **DONE on A03 + partial on c1-square + a02** (A03 5/5 = 1.000; c1-square 3 of 5 done at 96%; a02 latent partially failed) | `reports/A03_5seed_ci.md` |
+| 1c-7 | SDXL Base 4-step rerun | **DONE** (1000 prompts, 28.6% safety_checker flag, gate ≥25% met) | `reports/base_i2p_4step_n1000.md` |
+| 1c-8 | FID/CLIP/LPIPS/DreamSim on D02/D03/D04 | **partial** (FID landed pre/post within 0.3; LPIPS+CLIP+DreamSim killed after 3 hr no output) | — |
+| 1c-9 | black-box attack vs SAE detector | **partial** (Square attack vs B02-v3 produced 0 bypasses on first 50 prompts; expected per `pre-flag rate × 14%` ~0/3) | `outputs/C01_square_vs_B02v3_n50_q1k/` |
 | 1c-10 | resume + scale up Phase C | **DONE** | C-3 safety SAE v2 trained, C-9 transcoder ran |
 
 ## Phase D progress
