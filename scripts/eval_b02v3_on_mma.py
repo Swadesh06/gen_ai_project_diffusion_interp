@@ -72,10 +72,13 @@ def main() -> int:
         latent = pipe.vae.encode(x).latent_dist.sample(generator=None) * pipe.vae.config.scaling_factor
 
         # forward through UNet at t=50 with empty conditioning
-        out, _ = pipe.encode_prompt(prompt=[""], prompt_2=[""], device="cuda",
+        result = pipe.encode_prompt(prompt=[""], prompt_2=[""], device="cuda",
                                     num_images_per_prompt=1, do_classifier_free_guidance=False)
-        if isinstance(out, tuple): prompt_embeds = out[0]
-        else: prompt_embeds = out
+        # SDXL encode_prompt returns (prompt_embeds, negative_prompt_embeds, pooled_prompt_embeds, negative_pooled_prompt_embeds)
+        if isinstance(result, tuple):
+            prompt_embeds = result[0]
+        else:
+            prompt_embeds = result
         # SDXL needs added_cond_kwargs
         pooled = torch.zeros((1, 1280), device="cuda", dtype=pipe.vae.dtype)
         time_ids = torch.tensor([[512, 512, 0, 0, 512, 512]], device="cuda", dtype=pipe.vae.dtype)
@@ -83,8 +86,16 @@ def main() -> int:
 
         with SurkovHookManager(pipe.unet, saes, capture=True, keep_inputs=False) as mgr:
             _ = pipe.unet(latent, torch.tensor([50], device="cuda"), encoder_hidden_states=prompt_embeds, added_cond_kwargs=added).sample
-            zs = mgr.get_last_z()  # dict[hp -> (B, n_features)]
-        return torch.cat([zs[hp].float().mean(dim=tuple(range(1, zs[hp].ndim - 1))).flatten() for hp in HOOKPOINTS], dim=0)
+        # mgr.captured[hp].z is a list of (B,H,W,F) tensors (one per hook fire); use first
+        feats = []
+        for hp in HOOKPOINTS:
+            z_list = mgr.captured[hp].z
+            if not z_list:
+                feats.append(torch.zeros(saes[hp].cfg.n_features if hasattr(saes[hp], 'cfg') else 5120, device="cuda"))
+                continue
+            z = z_list[0]  # shape (B, H, W, F)
+            feats.append(z.float().mean(dim=tuple(range(1, z.ndim - 1))).flatten())
+        return torch.cat(feats, dim=0)
 
     def score_dir(d):
         files = sorted(Path(d).glob("*.png"))

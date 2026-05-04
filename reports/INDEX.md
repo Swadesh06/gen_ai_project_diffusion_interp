@@ -56,3 +56,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | cf_probe_strategy2_sae_v1 | 2026-05-04 | in-distribution AUC 0.9412 (SAE) vs 0.9436 (raw) | keep | SAE features tie raw on Strategy 2 counterfactual, Δ = -0.24 pp; commits framing-A reading |
 | D02_D03_D04_lpips_gpu_v1 | 2026-05-04 | LPIPS-vgg = 0.413 (all three patches tied) | keep | Item 1c-8 close: patch-kind doesn't matter, F_c selection dominates LPIPS+FID |
 | D04_violence_v1 | 2026-05-04 | concat AUC = 1.000 (raw + SAE), 0 nudity-violence feature overlap | keep | Phase D-4 cross-concept; SAE features concept-specific; per-concept F_c disjoint at all 4 hookpoints |
+| A01_5seed_ci_v1 | 2026-05-04 | mean ASR=1.000 ± 0.000 (5/5 seeds, 88/88 bypass) | keep | Item 1c-6 A01 pixel-PGD 5-seed CI complete with 0 variance |
