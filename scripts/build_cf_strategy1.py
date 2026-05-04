@@ -31,13 +31,34 @@ from dsi.data.i2p import load_i2p  # noqa: E402
 
 
 def _read_label(p: Path) -> dict | None:
+    """Combine NudeNet/Q16 (.labels.json from cpu_worker) + safety_checker (.safety.json from batch_safety_checker)."""
+    rec = {}
+    seen = False
     side = p.with_suffix(p.suffix + ".labels.json")
-    if not side.exists():
+    if side.exists():
+        try:
+            r = json.loads(side.read_text())
+            seen = True
+            for k in ("nudenet", "q16"):
+                rec[k] = r.get(k, {})
+            if rec["nudenet"].get("flagged") or rec["q16"].get("flagged"):
+                rec["flagged_any"] = True
+        except Exception:
+            pass
+    safe_side = p.with_suffix(p.suffix + ".safety.json")
+    if safe_side.exists():
+        try:
+            r = json.loads(safe_side.read_text())
+            seen = True
+            rec["safety_checker"] = r
+            if r.get("flagged"):
+                rec["flagged_any"] = True
+        except Exception:
+            pass
+    if not seen:
         return None
-    try:
-        return json.loads(side.read_text())
-    except Exception:
-        return None
+    rec.setdefault("flagged_any", False)
+    return rec
 
 
 def cmd_build(args) -> int:

@@ -8,12 +8,14 @@ After fixing the bit-identical detector logits bug (Item 1c-1) and re-running
 against the **oracle-relabeled B02-oracle-v3** detector (Item 1c-3, AUC 0.977,
 1544 oracle-labelled samples), the cross-space cross-target matrix:
 
-| attack | safety_checker bypassed | detector also bypassed | transferability |
-|---|---|---|---|
-| A01 pixel-PGD ε=4/255   | 17 / 17 | **0** | **0.000** |
-| A02 latent-PGD ε=0.1    | 15 / 15 | **0** | **0.000** |
-| A03 embedding-PGD       | 15 / 15 | n/a (perturbation in CLIP-emb space — SAE detector trivially robust) |
-| **combined**            | **32 / 32** | **0 / 32** | **0.000** |
+
+| attack                | safety_checker bypassed | detector also bypassed                                               | transferability |
+| --------------------- | ----------------------- | -------------------------------------------------------------------- | --------------- |
+| A01 pixel-PGD ε=4/255 | 17 / 17                 | **0**                                                                | **0.000**       |
+| A02 latent-PGD ε=0.1  | 15 / 15                 | **0**                                                                | **0.000**       |
+| A03 embedding-PGD     | 15 / 15                 | n/a (perturbation in CLIP-emb space — SAE detector trivially robust) |                 |
+| **combined**          | **32 / 32**             | **0 / 32**                                                           | **0.000**       |
+
 
 `reports/C01_xtarget_v2_vs_B02v3_full.md`. Confirms Phase 1's `0/17`
 result was real (not the bit-identical-logits artefact). The transferability
@@ -21,13 +23,15 @@ gap is the cleanest Contribution 3 result for the paper.
 
 ### Detector AUC sweep
 
-| version | dataset | AUC | comment |
-|---|---|---|---|
-| B01 (prompt-origin labels) | 1167 | 1.000 | leak — flags prompts not images |
-| B02 v2 (balanced, MLP) | 1388 | 0.891 | severe class imbalance (41 NSFW) |
-| **B02 v3 (oracle, balanced, larger)** | **1544** | **0.977 (linear cat) / 0.977 (MLP up.0.0)** | Item 1c-3 close — 5x more NSFW (201) |
-| C-3 safety SAE v2 (concat MLP) | 1000 axbench | **1.000** | closes v1's 1.21pp gap |
-| C-9 transcoder (up.0.0→up.0.1) | 1000 axbench | 0.991 | adjacent-block reconstruction error |
+
+| version                               | dataset      | AUC                                         | comment                              |
+| ------------------------------------- | ------------ | ------------------------------------------- | ------------------------------------ |
+| B01 (prompt-origin labels)            | 1167         | 1.000                                       | leak — flags prompts not images      |
+| B02 v2 (balanced, MLP)                | 1388         | 0.891                                       | severe class imbalance (41 NSFW)     |
+| **B02 v3 (oracle, balanced, larger)** | **1544**     | **0.977 (linear cat) / 0.977 (MLP up.0.0)** | Item 1c-3 close — 5x more NSFW (201) |
+| C-3 safety SAE v2 (concat MLP)        | 1000 axbench | **1.000**                                   | closes v1's 1.21pp gap               |
+| C-9 transcoder (up.0.0→up.0.1)        | 1000 axbench | 0.991                                       | adjacent-block reconstruction error  |
+
 
 ### Counterfactual benchmark — Strategy 3 Path A (Gemini)
 
@@ -39,13 +43,15 @@ across every cell of `{I2P-style, COCO-style} × {safe, unsafe}` ×
 
 ### Phase D progress
 
-| idea | status | headline number |
-|---|---|---|
-| D-1 causal feature graphs (correlation v1) | **DONE** | 98 directed edges between Stage-1-Fisher top-20 features across 4 hookpoints; 18 roots, 18 sinks; max |β| = 5.85 (mid.0 f3885 → up.0.0 f1223) |
-| D-2 learned-projection intervention | **DONE** | per-hookpoint `Pi: R^d → R^d` trained; SAE-feature variant: benign preservation MSE 6e-5 to 9e-4, unsafe→benign-mean projection MSE 1e-3 to 1.5e-2 |
-| D-7 mechanistic trajectory plot | **DONE** (5 cases) | per-step per-feature SAE trajectory clean vs attacked, paper-figure quality; PDFs in `outputs/D07_mechanistic_trajectory/` |
-| D-3 (UnlearnDiffAtk) | folded into 1c-4; render in flight | 142 nudity prompts rendered |
-| D-9 FLUX cross-arch | pending (FLUX accessible) | — |
+
+| idea                                       | status                             | headline number                                                                                                                                    |
+| ------------------------------------------ | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-1 causal feature graphs (correlation v1) | **DONE**                           | 98 directed edges between Stage-1-Fisher top-20 features across 4 hookpoints; 18 roots, 18 sinks; max                                              |
+| D-2 learned-projection intervention        | **DONE**                           | per-hookpoint `Pi: R^d → R^d` trained; SAE-feature variant: benign preservation MSE 6e-5 to 9e-4, unsafe→benign-mean projection MSE 1e-3 to 1.5e-2 |
+| D-7 mechanistic trajectory plot            | **DONE** (5 cases)                 | per-step per-feature SAE trajectory clean vs attacked, paper-figure quality; PDFs in `outputs/D07_mechanistic_trajectory/`                         |
+| D-3 (UnlearnDiffAtk)                       | folded into 1c-4; render in flight | 142 nudity prompts rendered                                                                                                                        |
+| D-9 FLUX cross-arch                        | pending (FLUX accessible)          | —                                                                                                                                                  |
+
 
 ## In flight (not yet landed)
 
@@ -70,12 +76,12 @@ across every cell of `{I2P-style, COCO-style} × {safe, unsafe}` ×
 
 - 21-25 active tmux sessions throughout the session.
 - Peak GPU usage: 91 GB (96% of cap) during multi-job overlap; one OOM
-  cascade killed xtarget A02-v3 / A03-v3 + udatk-nudity v0; recovered after
-  some processes freed memory.
+cascade killed xtarget A02-v3 / A03-v3 + udatk-nudity v0; recovered after
+some processes freed memory.
 - Steady-state GPU: 60-80 GB.
 - 24 cpu-workers labelling in parallel with `OMP_NUM_THREADS=4` to avoid
-  the prior-session thread contention regime (prior pod's 1550 s/image
-  symptom is gone; current ~21-65 s/image steady-state).
+the prior-session thread contention regime (prior pod's 1550 s/image
+symptom is gone; current ~21-65 s/image steady-state).
 - Loadavg fluctuated 4-160 during launches; settled to 30-50 in steady state.
 
 ## Code inventory added this session (10 new files)
@@ -99,3 +105,4 @@ across every cell of `{I2P-style, COCO-style} × {safe, unsafe}` ×
 5. SAeUron repro.
 6. D-9 FLUX cross-arch (write FLUX SAE training; train on 4 DiT layers).
 7. Framing-decision moment when {1c-0, 1c-1, 1c-3, C-2-on-counterfactual} close.
+
