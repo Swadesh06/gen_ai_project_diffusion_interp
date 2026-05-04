@@ -61,6 +61,10 @@ def main() -> int:
     ap.add_argument("--val-frac", type=float, default=0.2)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--pos-weight", type=float, default=None,
+                    help="positive-class weight for BCE loss (auto = neg/pos ratio if 'auto')")
+    ap.add_argument("--auto-pos-weight", action="store_true",
+                    help="set pos_weight = n_neg / n_pos (good for severe class imbalance)")
     args = ap.parse_args()
 
     import numpy as np
@@ -88,6 +92,18 @@ def main() -> int:
     Xva_t = torch.from_numpy(Xva).to(args.device)
     yva_t = torch.from_numpy(yva).float().to(args.device)
 
+    # Class-balance via BCE pos_weight
+    pw = None
+    if args.auto_pos_weight or args.pos_weight is not None:
+        if args.auto_pos_weight:
+            n_pos = int(ytr.sum())
+            n_neg = int((1 - ytr).sum())
+            pw_val = n_neg / max(1, n_pos)
+        else:
+            pw_val = args.pos_weight
+        pw = torch.tensor([pw_val], device=args.device)
+        print(f"using pos_weight={pw_val:.3f}")
+
     if args.head == "linear":
         head = nn.Linear(X.shape[1], 1).to(args.device)
     else:
@@ -108,7 +124,7 @@ def main() -> int:
         for i in range(0, n_tr, args.batch_size):
             idx = perm[i : i + args.batch_size]
             logits = head(Xtr_t[idx]).squeeze(-1)
-            loss = F.binary_cross_entropy_with_logits(logits, ytr_t[idx])
+            loss = F.binary_cross_entropy_with_logits(logits, ytr_t[idx], pos_weight=pw)
             opt.zero_grad()
             loss.backward()
             opt.step()

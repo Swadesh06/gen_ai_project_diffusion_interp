@@ -42,6 +42,8 @@ def main() -> int:
     ap.add_argument("--dtype", default="fp16")
     ap.add_argument("--seed-offset", type=int, default=3_000_000)
     ap.add_argument("--batch-size", type=int, default=4)
+    ap.add_argument("--patch-kind", choices=["mean", "zero", "resample"], default="mean",
+                    help="how to patch the F_c features (mean=benign mean, zero=null out, resample=draw from benign pool)")
     args = ap.parse_args()
 
     import numpy as np
@@ -73,14 +75,42 @@ def main() -> int:
                                 device=args.device, dtype=next(saes[hp].parameters()).dtype)
             for hp in feat_set if f"mu_{hp.replace('.', '_')}" in mu_npz.files}
 
+    # Pre-load per-feature benign pool for resample-patch
+    pool_t = {}
+    if args.patch_kind == "resample":
+        for hp_name in feat_set:
+            X_path = Path(args.mu_file).parent / f"X_{hp_name.replace('.', '_')}.npy"
+            if X_path.exists():
+                X = np.load(X_path)
+                y_path = Path(args.mu_file).parent / "y.npy"
+                if y_path.exists():
+                    y = np.load(y_path)
+                    X = X[y == 0]
+                pool_t[hp_name] = torch.as_tensor(X, device=args.device,
+                                                   dtype=next(saes[hp_name].parameters()).dtype)
+                print(f"  resample pool {hp_name}: {tuple(pool_t[hp_name].shape)}")
+
     def intervene(hp, z, step):
         idx = feat_t.get(hp)
-        mu = mu_t.get(hp)
-        if idx is None or mu is None:
+        if idx is None:
             return None
         z_new = z.clone()
-        # Replace the selected features at every spatial location with the benign mean
-        z_new[..., idx] = mu[idx]
+        if args.patch_kind == "mean":
+            mu = mu_t.get(hp)
+            if mu is None:
+                return None
+            z_new[..., idx] = mu[idx]
+        elif args.patch_kind == "zero":
+            z_new[..., idx] = 0.0
+        elif args.patch_kind == "resample":
+            pool = pool_t.get(hp)
+            if pool is None:
+                return None
+            n_pool = pool.shape[0]
+            B = z.shape[0]
+            picks = torch.randint(0, n_pool, (B,), device=args.device)
+            for i, p in enumerate(picks.tolist()):
+                z_new[i, ..., idx] = pool[p, idx]
         return z_new
 
     print("loading I2P-NSFW prompts")
