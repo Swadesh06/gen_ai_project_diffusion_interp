@@ -40,3 +40,15 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | D07_mechanistic_trajectory_v1 | 2026-05-04 | 5 bypass cases plotted | keep | per-step per-feature SAE trajectory clean vs attacked, paper figure candidate |
 | D02_learned_projection_v1 | 2026-05-04 | per-hookpoint Pi trained, raw + sae | keep | Pi(z_benign)≈z_benign, Pi(z_unsafe)→mu_benign; drop-in for mean-patch |
 | D01_causal_feature_graph_v1 | 2026-05-04 | 98 edges, 18 roots, 18 sinks | keep | Marks-style attribution-by-correlation graph at top-20 Stage-1 features |
+| base_i2p_4step_n1000 | 2026-05-04 | 286/1000 safety_checker flag (28.6%) | keep | Item 1c-7 SDXL Base 4-step rerun, gate ≥25% met, 3.4× SDXL Turbo's 8.5% |
+| udatk_safety_scores | 2026-05-04 | nudity 53/142 (37.3%), violence 44/200 (22.0%) | keep | Item 1c-4 UnlearnDiffAtk render + safety_checker baseline |
+| cf_strategy2_seed_pairs | 2026-05-04 | 246 validated pairs from 100 prompts × 8 seeds | keep | Item 1c-0 Strategy 2 done, gate ≥200 met by margin |
+| cf_probe_strategy1_v1 | 2026-05-04 | per-cluster AUC 0.49-0.56, in-distribution 0.275 | keep | Strategy 1 framing-discriminator: SAE features fail counterfactual prompt-edit task |
+| cf_probe_strategy2_v1 | 2026-05-04 | in-distribution AUC 0.9436, AP 0.8840 | keep | Strategy 2 framing-discriminator: SAE features SUCCEED on same-prompt seed-pair task |
+| C01_xtarget_v2_vs_B02v3_full | 2026-05-04 | A01+A02 32/32 safety bypass, 0/32 detector bypass | keep | combined xtarget result vs oracle-relabelled B02-v3, transferability=0.000 |
+| A03_5seed_ci | 2026-05-04 | 5/5 seeds at ASR=1.000 (102/102 pre_flagged bypass) | keep | Item 1c-6 A03 embedding-PGD 5-seed CI complete with 0 variance |
+| C01_square_5seed_ci | 2026-05-04 | mean ASR=0.954 ± 0.029 across 5 seeds (211/221) | keep | Item 1c-6 black-box Square Attack 5-seed CI complete, 95% CI [0.93, 0.97] |
+| D09_pixart_sigma_smoke | 2026-05-04 | 10 imgs, 4 hookpoints, 12.6 GB | keep | Phase D-9 cross-arch DiT activation collection plumbing works |
+| D09_sd3_smoke | 2026-05-04 | 20 imgs, 24 MM-DiT blocks, 15.1 GB | keep | Phase D-9 SD3-medium MM-DiT (closer to FLUX); 4 hookpoints captured |
+| repro_saeuron_nudity_n30_smoke | 2026-05-04 | 33% baseline -> 43% with-saeuron (wrong feature_idx 11627=cat) | partial-keep | Item 1c-5 SAeUron pipeline integration verified; needs correct nudity feature_idx |
+| mma_diffusion_safety_baseline | 2026-05-04 | orig 7.5%, adv-gen 58% safety_checker flag | keep | newly-accessible MMA-Diffusion image set; baseline ASR table |
