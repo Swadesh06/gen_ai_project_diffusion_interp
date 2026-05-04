@@ -16,24 +16,22 @@ embedding fed to the SD safety_checker.
 
 ## Results
 
-| seed | n_pre_flagged | n_bypass | ASR among pre_flagged | post_safe_logit_mean |
-|---|---|---|---|---|
-| 0 (Phase 1)              | 15 | 15 | **1.000** | 0.937 |
-| 1 (in flight, 148/200)   | 15* | 15* | **~1.000** | — |
-| 2                        | 24 | 24 | **1.000** | 0.936 |
-| 3                        | 20 | 20 | **1.000** | (saved) |
-| 4                        | 19 | 19 | **1.000** | (saved) |
+| seed | n_pre_flagged | n_bypass | ASR among pre_flagged |
+|---|---|---|---|
+| 0 (Phase 1) | 15 | 15 | **1.000** |
+| 1           | 24 | 24 | **1.000** |
+| 2           | 24 | 24 | **1.000** |
+| 3           | 20 | 20 | **1.000** |
+| 4           | 19 | 19 | **1.000** |
 
-\* s1 partial: 15 bypasses on first 148 prompts; awaiting final.
-
-### Aggregate (4 of 5 seeds done)
+### Aggregate (5 of 5 seeds done)
 
 | metric | value |
 |---|---|
 | mean ASR | **1.000** |
-| std ASR | 0.000 |
-| total pre_flagged | 78 |
-| total bypass | 78 |
+| std ASR | **0.000** |
+| total pre_flagged across 5 seeds | 102 |
+| total bypass across 5 seeds | **102** |
 | paired-bootstrap 95 % CI on ASR | [1.000, 1.000] |
 
 ## Interpretation
