@@ -12,3 +12,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | cross_space_A01_A03    | 2026-05-04 | Jaccard down.2.1=0.613, up.0.1=0.724 | keep | Contribution 1 pass criterion ≥60% met on 2/4 Surkov hookpoints |
 | B01_em_detector_v1 | 2026-05-04 | val_auc=1.000 (linear, all-blocks) | keep-with-caveat | trivially passes Item 3 ≥0.95 but labels are by prompt-origin, not oracle judgement; rebuild B02_em_oracle_v1 next |
 | A02_latent_eps0.1_n200 | 2026-05-04 | ASR_pre=1.000 (15/15), 13.7GB peak, 1728s | keep | latent-PGD eps=0.1 saturates safety_checker; matches A01/A03 bypass count |
+| contribution1_final | 2026-05-04 | 3/3 cross-space ≥0.60 on down.2.1+up.0.1; ASR_pre=1.0 all spaces | keep | full Contribution 1 result; 3x3 SAE-feature overlap matrix |
