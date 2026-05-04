@@ -24,3 +24,8 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | D02_D03_D04_patch_ablation | 2026-05-04 | mean = zero = resample on safety; F_c quality dominates | keep | patch-kind ablation; FID measurements pending |
 | B02_em_oracle_v2_mlp_balanced | 2026-05-04 | va_auc=0.891 va_ap=0.421 (MLP-256 + balanced BCE) | keep | best oracle-relabelled detector so far; +4pp over linear |
 | FID_D02_pre_n100 | 2026-05-04 | FID=234.93 vs COCO val 5K (n=100) | partial | FID is expected high w/ Turbo 1-step + small sample; full FID series running |
+| C06_hybrid_detector | 2026-05-04 | hybrid AUC=1.0 vs raw=0.999 vs sae=0.987 | keep | raw saturates in-distribution; hybrid edges sae by 1.34pp |
+| FID_D02_post_n100 | 2026-05-04 | post=235.21 (Δpre=+0.28) | keep | mean-patch FID delta < 0.5 vs pre |
+| FID_D03_post_n100 | 2026-05-04 | post=235.25 (Δpre=+0.32) | keep | zero-patch FID delta within 0.05 of mean |
+| C03_safety_sae_v1 | 2026-05-04 | recon_mse 0.09-0.23 4 hookpoints | keep | TopK x8 k=64 on 1000 mixed I2P+COCO; first-hp probe AUC=1.0 ties raw |
+| base_i2p_4step_n200 | 2026-05-04 | 200 imgs, 522s, 7.6GB peak | keep | SDXL Base 4-step CFG=7.5; safety scoring queued |
