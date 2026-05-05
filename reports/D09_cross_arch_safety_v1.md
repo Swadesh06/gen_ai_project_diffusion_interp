@@ -29,7 +29,7 @@ score with CompVis StableDiffusionSafetyChecker.
 | SDXL Base 4-step | 1000 | 286 | **0.286** | [0.259, 0.315] |
 | SD v1.4 + SAeUron baseline | 30 | 10 | 0.333 | [0.198, 0.501] |
 | **SD3-medium** | 100 | 4 | **0.040** | **[0.016, 0.099]** |
-| PixArt-Sigma smoke | 10 | 0 | 0.000 | [0.000, 0.278] |
+| **PixArt-Sigma 1024-MS** | **100** | **2** | **0.020** | **[0.006, 0.071]** |
 | FLUX.1-schnell | (model loads, inference hangs at 0% GPU; deferred) | tbd | tbd | tbd |
 
 ## Interpretation

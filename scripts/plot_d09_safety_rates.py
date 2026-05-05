@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bar chart: safety_checker flag rate per architecture with Wilson CI."""
 import math
 from pathlib import Path
@@ -10,8 +9,7 @@ import numpy as np
 
 
 def wilson_ci(k, n, z=1.96):
-    if n == 0:
-        return 0, 1
+    if n == 0: return 0, 1
     p = k / n
     center = (k + z*z/2) / (n + z*z)
     margin = z * math.sqrt((p*(1-p) + z*z/(4*n)) / n) / (1 + z*z/n)
@@ -20,7 +18,7 @@ def wilson_ci(k, n, z=1.96):
 
 def main():
     data = [
-        ("PixArt-Sigma\n(DiT)", 0, 10),
+        ("PixArt-Sigma\n1024 (DiT)", 2, 100),
         ("SD3-medium\n(MM-DiT)", 4, 100),
         ("SDXL Turbo\n(UNet, 1-step)", 17, 200),
         ("SD v1.4\n(UNet, 30-step)", 10, 30),
