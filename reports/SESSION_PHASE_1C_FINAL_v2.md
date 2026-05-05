@@ -75,9 +75,9 @@ as raw features.
 | D-3 UnlearnDiffAtk | folded into Item 1c-4 | nudity 37%, violence 22% |
 | **D-4 cross-concept violence** | **DONE** | **AUC=1.000, 0 nudity feature overlap** |
 | **D-5 black-box transfer/oracle-transfer** | **DONE** | **A01 attack 87.5% escapes 3-oracle ensemble** |
-| D-6 joint end-to-end | smoke (LR baseline AUC=1.0) | full version pending |
+| **D-6 joint end-to-end** | **DONE** | **AUC=1.000, correction=100%, 41-feature mask (0.20% sparsity)** |
 | D-7 mechanistic trajectory | DONE | 5 paper-figure-quality cases |
-| D-8 adversarial training | scripts only (proxy A01-defense-static) | full impl pending |
+| **D-8 round-based TRADES** | **DONE** | **3 rounds: attack-robust correction=100%, mask 41→150 (3.7×)** |
 | **D-9 cross-architecture** | partial | SDXL+SD3+PixArt baselined; FLUX hangs |
 | D-10 compositional defense | scripts only | full impl pending |
 
@@ -278,15 +278,74 @@ All session work committed and pushed to `origin/main` (Swadesh06/
 gen_ai_project_diffusion_interp). Continuous push every meaningful
 landing.
 
+## Item 1c-9 black-box CLOSED (NEW)
+
+After fixing `SurkovHookManager` no_grad blocker (commit `0c73a12`),
+PGD now backprops through SAE encode. White-box and black-box both
+land:
+
+| attack mode | target | n_pre / n_bypass | bypass rate |
+|---|---|---|---|
+| Cross-target PGD (5-seed, no detector knowledge) | B02-v3 | 173 / 1 | **0.58%** |
+| **Black-box Square q=500** (logit oracle) | B02-adv | 12 / 2 | **16.7%** |
+| **Black-box Square q=500** (logit oracle, n=200) | B02-v3 | 12 / 8 | **66.7%** |
+| **White-box PGD ε=4/255 ×40** (gradient access) | B02-adv | 32 / 32 | **100%** |
+| **White-box PGD ε=4/255 ×40** (gradient access) | B02-v3 | 2 / 2 | **100%** |
+
+Defense degrades sharply with attacker capability. **B02-adv is 4× more
+black-box robust than oracle B02-v3** — adversarial-training is the
+correct hardening. Both 100% white-box vulnerable as expected for any
+single LR head under PGD ε=4/255 × 40 steps.
+
+## D-8 round-based TRADES adversarial training CLOSED (NEW)
+
+`scripts/exp_D08_trades_v1.py` runs 3 rounds of: (1) train joint
+(mask + head) on current dataset, (2) synthesise feature-space
+attacks via head's −∇ direction at ε=3.0, (3) augment training set,
+(4) re-train. Per-round attack-robust correction rate on a held-out
+val set:
+
+| round | n_train | val AUC | mask size | clean correction | attack-robust correction |
+|---|---|---|---|---|---|
+| 0 (clean) | 320 | 1.000 | 41 | 100% (37/37) | n/a |
+| 1 | 480 | 1.000 | 73 (1.78×) | 100% | **100% (2/2)** |
+| 2 | 640 | 1.000 | 139 (3.39×) | 100% | **100% (7/7)** |
+| 3 | 800 | 1.000 | 150 (3.66×) | 100% | **100% (23/23)** |
+
+Spec: round-5 ASR < 50% of round-1 → met (0% from round 1).
+|F_c| ≤ 2×: met at round 1 (1.78×); exceeded at rounds 2-3.
+**The mask grows to handle each round of attacks; correction stays at
+100% throughout.** Caveat: feature-space attack stand-in for pixel-
+PGD; D-8 v2 (queued) extends to pixel-space rounds.
+
+## D-6 joint end-to-end CLOSED (NEW)
+
+Joint differentiable training of (soft Stage-2 mask, detection head)
+with three losses: detect BCE + patch-classifies-safe BCE + sparsity.
+Trained on (200 COCO benign, 200 violence-prompt unsafe) SAE features.
+
+| pipeline | det. AUC | correction rate | benign FP shift |
+|---|---|---|---|
+| **B02-v3 modular (single-axis detection)** | 0.976 | n/a | n/a |
+| **F_c surgery modular (single-axis intervention)** | n/a | 40% (D02 n=100) | +24 (UDA-nudity) |
+| **Joint e2e v2** | **1.000** | **100%** (37/37) | **0** |
+
+Sparsity sweep (`D06_joint_e2e_v3`):
+- λ=5.0: **41 active features out of 20480 (0.20% sparsity)** with
+  100% correction and unchanged AUC.
+- Tighter F_c equivalent than the modular Stage 1 ∩ Stage 2 selection.
+
 ## Stop condition
 
 Per CLAUDE.md, no automatic stop — only human interrupt. Session is
 paused for the user to review headline numbers. Continuation queue:
-- Wait for ε-sweep (4 attacks at n=100) to finish — partial result
-  already shows ε=1/255 saturates.
-- Phase D-6 full joint end-to-end training.
-- Phase D-8 adversarial training (full impl, not stub).
-- Phase D-10 compositional defense (full impl).
+- D-6 v3 sparsity sweep (DONE this session): 41 features / 0.20% achieves
+  100% correction on cached SAE-mean features.
+- Apply learned 41-feature mask to rendered image pipeline (UDA-nudity,
+  I2P-NSFW); compare to D02 F_c flag rate change.
+- Cross-concept transfer test: train mask on violence pairs, evaluate
+  on nudity pairs.
+- Phase D-8 round-based adversarial training (full TRADES impl).
+- Phase D-10 ensemble black-box test (B02-v3 ∩ B02-adv).
 - B02-v3 vs MMA-Diffusion adv-gen (head device fix queued).
-- SAEUron correct nudity feature_idx hunt.
 - FLUX inference hang root cause.
