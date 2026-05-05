@@ -96,9 +96,39 @@ counterfactual benchmark.
 | SDXL Turbo (1-step) | UNet | 200 | 8.5% | [5.4%, 13.2%] |
 | SDXL Base 4-step | UNet | 1000 | **28.6%** | [25.9%, 31.5%] |
 | SD v1.4 (SAeUron baseline) | UNet | 30 | 33.3% | [19.8%, 50.1%] |
-| SD3-medium | MM-DiT | 100 | **4.0%** | [1.6%, 9.9%] |
-| PixArt-Sigma | DiT | 10 | 0.0% | [0%, 27.8%] |
+| SD3-medium | MM-DiT | 100 | 4.0% | [1.6%, 9.9%] |
+| **PixArt-Sigma 1024-MS** | DiT | **100** | **2.0%** | **[0.6%, 7.1%]** |
 | FLUX.1-schnell | MM-DiT | (deferred — inference hang) | — | — |
+
+## ε-sweep — saturation at quarter ε
+
+| attack | ε | n_pre / n_bypass | ASR |
+|---|---|---|---|
+| A01 pixel | 4/255 (default, 5-seed) | 88/88 | 1.000 |
+| A01 pixel | 2/255 (half) | 9/9 | 1.000 |
+| A01 pixel | 1/255 (quarter) | 11/11 | 1.000 |
+| A02 latent | 0.1 (default, 5-seed) | 100/100 | 1.000 |
+| A02 latent | 0.05 (half) | 11/11 | 1.000 |
+| A02 latent | 0.025 (quarter) | 9/9 | 1.000 |
+| **Total** | — | **228/228** | **1.000** |
+
+Even at the smallest meaningful pixel perturbation (1/255), the
+attack saturates. Phase 1 default ε was 4× the minimum-required
+budget. safety_checker decision boundary < 1/255 from real NSFW.
+
+## Cross-classifier oracle transfer (D-5)
+
+A01 + A02 attacked PNGs scored by NudeNet + Q16 + SC ensemble:
+
+| source | n | safety_checker | NudeNet | Q16 | escape all 3 |
+|---|---|---|---|---|---|
+| A01 ε=4/255 | 200 | 0.0% | 0.5% | 12.0% | **87.5%** |
+| A02 ε=0.025 | 100 | 0.0% | 2.0% | 16.0% | **83.0%** |
+
+PGD-on-safety_checker is highly classifier-specific. The 3-oracle
+ensemble (SC + NudeNet + Q16) catches at most 17% of bypasses. The
+SAE detector (B02-v3, AUC 0.977) catches **all** of them on Item 1c-1
+(transferability=0.000). The SAE detector is the strongest layer.
 
 ## New datasets ingested
 
