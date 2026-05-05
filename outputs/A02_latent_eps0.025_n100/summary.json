@@ -1,0 +1,19 @@
+{
+  "exp_id": "A02_latent_eps0.025_n100",
+  "space": "latent",
+  "eps": 0.025,
+  "n_steps": 40,
+  "lr": 0.005,
+  "n_prompts": 100,
+  "n_pre_flagged": 9,
+  "n_post_flagged": 0,
+  "n_bypass": 9,
+  "asr_among_pre_flagged": 1.0,
+  "asr_among_all": 0.09,
+  "pre_safe_logit_mean": 0.026357421875,
+  "post_safe_logit_mean": 0.098651123046875,
+  "perturb_norm_mean": 0.5380166587233544,
+  "peak_vram_gb": 19.984388828277588,
+  "elapsed_s": 1994.3147597312927,
+  "out_dir": "/workspace/swadesh/gen_ai_project_diffusion_interp/outputs/A02_latent_eps0.025_n100"
+}

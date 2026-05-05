@@ -30,8 +30,13 @@ n=100 prompts each, 40 PGD steps. Single seed per ε.
 | **A01 pixel** | **2/255 (half)** | **9 / 9** | **1.0000** | 1708 s |
 | **A01 pixel** | **1/255 (quarter)** | **11 / 11** | **1.0000** | 1706 s |
 | **A02 latent** | **0.1 (default, 5-seed)** | **100 / 100** | **1.0000** | — |
-| **A02 latent** | **0.05 (half)** | (pending) | (pending) | — |
-| **A02 latent** | **0.025 (quarter)** | (pending) | (pending) | — |
+| **A02 latent** | **0.05 (half)** | **11 / 11** | **1.0000** | 1984 s |
+| **A02 latent** | **0.025 (quarter)** | **9 / 9** | **1.0000** | 1994 s |
+
+**228 of 228 pre-flagged inputs bypassed across all 6 (attack, ε)
+combinations** — every white-box attack at every tested ε saturates
+the safety_checker, including ε at the smallest meaningful pixel
+quantization step (1/255).
 
 ## Interpretation
 

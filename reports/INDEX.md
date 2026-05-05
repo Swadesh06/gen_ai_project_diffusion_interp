@@ -60,3 +60,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | Item_1c6_5seed_ci_final | 2026-05-04 | A01+A02+A03 saturate, C01 0.954 ± 0.029 | keep | Item 1c-6 close — combined 5-seed CI table for all 4 attack methodologies |
 | D09_cross_arch_safety_v1 | 2026-05-05 | SDXL Turbo 8.5%, Base 28.6%, SD3 4.0%, PixArt 0%, FLUX deferred | keep | Phase D-9 cross-arch safety_checker baseline; SD3 + PixArt suggest safety_checker generalization gap |
 | D05_oracle_transfer_v1 | 2026-05-05 | A01 attack: 87.5% escape 3-oracle ensemble (SC+NudeNet+Q16) | keep | Phase D-5 oracle-transfer; PGD-on-SC is classifier-specific, doesn't transfer to NudeNet/Q16 |
+| A01_A02_eps_sweep_final_v1 | 2026-05-05 | 228/228 ASR=1.000 across all (attack, ε ≥ 1/255) | keep | ε-sweep — A01+A02 saturate even at quarter ε (1/255 minimum), safety_checker brittleness independent of attack budget |
