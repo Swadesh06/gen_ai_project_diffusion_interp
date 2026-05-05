@@ -286,3 +286,25 @@ Beyond these ten, ideas to prototype if compute remains:
 ### FLUX status
 Inference hangs at 0% GPU after model loads. Re-run with smaller height+
 shorter prompts queued; not blocking session.
+
+## 2026-05-05 update — eps-sweep complete, eps eighth abandoned
+
+### Landed
+- A01_A02_eps_sweep_final_v1.md — 228/228 ASR=1.000 across all (attack, ε ≥ 1/255)
+- D05_oracle_transfer_v1.md — A01 87.5% escapes 3-oracle ensemble
+- A01_5seed_ci_v1.md, Item_1c6_5seed_ci_final.md — 5-seed CIs done
+- D04_violence_v1.md — concept-specific feature selectivity
+- D02_D03_D04_lpips_gpu_v1.md — patch-kind ablation tied
+- cf_probe_strategy2_sae_v1.md — SAE-vs-raw counterfactual
+- D09_cross_arch_safety_v1.md — SD3 4.0%, PixArt 0%, FLUX deferred
+- REFRAMING_DECISION.md — Framing A canonical
+- 4 paper figures (concept_overlap, eps_sweep, 5seed_asr, d09_cross_arch)
+
+### Abandoned this session
+- ε=0.5/255 pixel + ε=0.0125 latent — sub-quantization noise level, very slow
+  (~100-200s per prompt, would take 3+ hrs); not informative since pixel
+  PGD at 0.5/255 falls below uint8 quantization step
+- B02-v3 vs MMA — head/feature device mismatch, fix queued
+
+### In flight
+- D-5 oracle-transfer on A02-eps0.025 outputs (20/100)
