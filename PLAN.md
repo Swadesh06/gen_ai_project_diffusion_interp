@@ -271,3 +271,18 @@ Beyond these ten, ideas to prototype if compute remains:
 - B02-v3 vs MMA-Diffusion adv-gen — abandoned this session (device mismatch in head/feat); fix queued
 - SAEUron correct nudity feature_idx — abandoned (no published per-concept indices for SAEUron_coco)
 
+
+## 2026-05-05 update — ε-sweep launched, FLUX deferred
+
+### Landed in past hour
+- D09_cross_arch_safety_v1.md — SD3 4.0%, PixArt 0%, FLUX deferred
+- A02 5-seed CI complete (4/4 banked at ASR=1.000)
+- Item_1c6_5seed_ci_final.md — combined CI table
+
+### In flight
+- D-5 oracle-transfer (140/200 → ~30 more min)
+- ε-sweep (4 attacks at n=100): A01 eps={1,2}/255, A02 eps={0.05,0.025}
+
+### FLUX status
+Inference hangs at 0% GPU after model loads. Re-run with smaller height+
+shorter prompts queued; not blocking session.
