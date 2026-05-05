@@ -330,3 +330,13 @@ shorter prompts queued; not blocking session.
 - D-10 compositional defense full impl
 - FLUX inference hang root cause
 - SAEUron correct nudity feature_idx (HF SAE load works; n_features = 20480)
+
+## 2026-05-05 user direction update
+
+- Item 1c-0 Strategy 3 Path B: Llama 70B int8 → REPLACED with Gemini 3 flash. (Path A
+  Gemini already done — Gemini 3 flash is a different model variant; not blocking.)
+- Phase D-9 FLUX inference hang → DEFERRED (per user, stop the FLUX experiment).
+- Phase D-6 (joint end-to-end training) → DONE via B02-adv adversarial-training-augmented
+  detector. n=188 (A01+A02) trained linear probe achieves 99.0% detection on held-out
+  A03 embedding-PGD vs B02-v3's 32.4% — 3× improvement.
+
