@@ -65,3 +65,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | MMA_oracle_v1 | 2026-05-05 | MMA adv-gen: 58% SC, 20% NudeNet, 28% Q16, 74% any | keep | composite defense view; A01 + MMA reveal 3 orthogonal blind spots; layered defense necessary |
 | D8_static_defense_v1 | 2026-05-05 | F_c surgery 40% corrected, 0.413 LPIPS, ΔFID +0.28 | keep | Phase D-8 static defense framing; consolidates D02/D03/D04 patch ablation as inference-time NSFW correction with quality preservation |
 | D10_compositional_v1 | 2026-05-05 | SC + SAE union 14% pre, 16% post (F_c shifts NSFW signal) | keep | Phase D-10 composite defense; F_c surgery moves signal from SC→SAE detector, doesn't reduce union; quantifies layer complementarity |
+| C01_xtarget_5seed_v1 | 2026-05-05 | 5-seed transferability: 1/173 = 0.58% (95% CI [0.10%, 3.20%]) | keep | Item 1c-1 5-seed scaled — A01+A02 vs B02-v3 SAE detector; tightens single-seed 0/32 to 1/173 across 10 attack runs |
