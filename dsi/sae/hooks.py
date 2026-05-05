@@ -95,6 +95,7 @@ class SurkovHookManager:
         intervene_fn: Callable | None = None,
         device: str | None = None,
         keep_inputs: bool = False,
+        attack_mode: bool = False,
     ):
         if torch is None:
             raise ImportError("PyTorch required")
@@ -105,6 +106,11 @@ class SurkovHookManager:
         self.intervene_fn = intervene_fn
         self.device = device
         self.keep_inputs = keep_inputs
+        # attack_mode: keep z gradient-attached and on-device for attack-time
+        # backprop (e.g., PGD that needs gradient through SAE encode). When
+        # True, also stores the live z tensor (not detached cpu) so callers
+        # can read it via mgr.captured[hp].z[-1] for loss computation.
+        self.attack_mode = attack_mode
         self.captured: dict[str, HookCapture] = {hp: HookCapture(hp) for hp in saes}
         self._handles: list = []
         self._step_counter: int = 0
@@ -139,13 +145,25 @@ class SurkovHookManager:
             diff = out - inp                        # residual contribution
             x_bhwc = diff.permute(0, 2, 3, 1)       # (B, H, W, C)
             x_norm = self._normalize(x_bhwc, hookpoint).to(next(sae.parameters()).device)
-            with torch.no_grad():
+            if self.attack_mode:
+                # Keep the encode in the autograd graph so attack-time PGD can
+                # backprop loss through z to the input image.
                 z = sae.encode(x_norm.to(next(sae.parameters()).dtype))
+            else:
+                with torch.no_grad():
+                    z = sae.encode(x_norm.to(next(sae.parameters()).dtype))
             if self.capture:
                 cap = self.captured[hookpoint]
-                if self.keep_inputs:
-                    cap.inputs.append(diff.detach().cpu())
-                cap.z.append(z.detach().cpu())
+                if self.attack_mode:
+                    # Live z tensor on device, gradient attached. Caller reads
+                    # cap.z[-1] for loss computation.
+                    if self.keep_inputs:
+                        cap.inputs.append(diff)
+                    cap.z.append(z)
+                else:
+                    if self.keep_inputs:
+                        cap.inputs.append(diff.detach().cpu())
+                    cap.z.append(z.detach().cpu())
                 cap.timesteps.append(self._step_counter)
             if self.intervene_fn is not None:
                 z_new = self.intervene_fn(hookpoint, z, self._step_counter)

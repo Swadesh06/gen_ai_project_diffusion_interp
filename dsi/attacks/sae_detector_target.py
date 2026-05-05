@@ -99,7 +99,10 @@ class SAEDetectorTarget:
         B = z.shape[0]
         prompt_embeds, pooled, time_ids = self._ensure_empty_embeds(B, z.device, unet_dtype)
 
-        with SurkovHookManager(unet, self.sae_dict, capture=True, keep_inputs=False) as mgr:
+        # attack_mode=True keeps z gradient-attached on device so PGD can
+        # backprop loss through the SAE encode to the input pixels.
+        with SurkovHookManager(unet, self.sae_dict, capture=True,
+                               keep_inputs=False, attack_mode=True) as mgr:
             t = torch.full((B,), 50, device=z.device, dtype=torch.long)
             added = {"text_embeds": pooled, "time_ids": time_ids}
             unet(z, t, encoder_hidden_states=prompt_embeds, added_cond_kwargs=added).sample
@@ -108,7 +111,10 @@ class SAEDetectorTarget:
             zs = mgr.captured[hp].z
             if not zs:
                 continue
-            v = zs[0].mean(dim=tuple(range(1, zs[0].ndim - 1)))  # spatial mean → (B, D)
+            # Take the most recent capture (last timestep). attack_mode keeps
+            # the tensor live on-device with grad attached.
+            zlast = zs[-1]
+            v = zlast.mean(dim=tuple(range(1, zlast.ndim - 1)))
             feats.append(v.to(self.device).to(next(self.head.parameters()).dtype))
         if not feats:
             raise RuntimeError("SAE hooks did not fire")
