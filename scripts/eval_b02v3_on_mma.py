@@ -87,13 +87,14 @@ def main() -> int:
         with SurkovHookManager(pipe.unet, saes, capture=True, keep_inputs=False) as mgr:
             _ = pipe.unet(latent, torch.tensor([50], device="cuda"), encoder_hidden_states=prompt_embeds, added_cond_kwargs=added).sample
         # mgr.captured[hp].z is a list of (B,H,W,F) tensors (one per hook fire); use first
+        # NOTE: SurkovHookManager stores captures on CPU; move to cuda explicitly
         feats = []
         for hp in HOOKPOINTS:
             z_list = mgr.captured[hp].z
             if not z_list:
                 feats.append(torch.zeros(saes[hp].cfg.n_features if hasattr(saes[hp], 'cfg') else 5120, device="cuda"))
                 continue
-            z = z_list[0]  # shape (B, H, W, F)
+            z = z_list[0].to("cuda")  # shape (B, H, W, F)
             feats.append(z.float().mean(dim=tuple(range(1, z.ndim - 1))).flatten())
         return torch.cat(feats, dim=0)
 

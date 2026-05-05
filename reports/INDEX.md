@@ -61,3 +61,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | D09_cross_arch_safety_v1 | 2026-05-05 | SDXL Turbo 8.5%, Base 28.6%, SD3 4.0%, PixArt 0%, FLUX deferred | keep | Phase D-9 cross-arch safety_checker baseline; SD3 + PixArt suggest safety_checker generalization gap |
 | D05_oracle_transfer_v1 | 2026-05-05 | A01 attack: 87.5% escape 3-oracle ensemble (SC+NudeNet+Q16) | keep | Phase D-5 oracle-transfer; PGD-on-SC is classifier-specific, doesn't transfer to NudeNet/Q16 |
 | A01_A02_eps_sweep_final_v1 | 2026-05-05 | 228/228 ASR=1.000 across all (attack, ε ≥ 1/255) | keep | ε-sweep — A01+A02 saturate even at quarter ε (1/255 minimum), safety_checker brittleness independent of attack budget |
+| B02v3_on_mma_v1 | 2026-05-05 | adv vs orig AUC=0.388 (detector OOD) | keep | B02-v3 SAE detector does NOT generalize to MMA-Diffusion (SD v1.4 backbone); 0/50+0/53 flagged at logit>0; caveat for Framing A architecture-specificity |
