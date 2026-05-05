@@ -338,15 +338,19 @@ Sparsity sweep (`D06_joint_e2e_v3`):
 **Render-and-test on UDA-nudity** (`D06_joint_mask_udatk_v1`): the
 41-feature mask applied as SDXL UNet hook on UDA-nudity n=50 prompts.
 
-| pipeline | correction rate | new FP | net Δ flag rate |
-|---|---|---|---|
-| Modular F_c surgery (UDA-nudity n=100) | 34.3% (12/35) | 24 | +12 (worse) |
-| **Joint mask v3 λ=5.0** (UDA-nudity n=50) | **47.4%** (9/19) | **8** | **-1** (improved) |
+| training data | active feat | corr rate | new FP | net Δ |
+|---|---|---|---|---|
+| Modular F_c surgery (UDA-nudity n=100) | ~32 | 34% | 24 | +12 |
+| **Joint mask (violence vs COCO) λ=5.0** | **41** | **47.4%** | **8** | **-1** |
+| Joint mask (cf_strategy2 pairs) | 384 | 36.8% | 11 | +4 |
+| Joint mask (i2p vs COCO) | 44 | 36.8% | 13 | +6 |
 
-Cached-feature 100% correction translates to render-time 47% (loss
-from spatial-pooling mismatch), but still beats F_c modular surgery
-on every axis. Mask concentrates on `down.2.1` (24/41) + `up.0.1`
-(16/41); `mid.0` contributes 0.
+The **violence-trained 41-feature mask wins across all metrics**.
+Counter-intuitive but empirically clean: violence training (a wrong
+concept on the surface) finds safety_checker-axis-aligned SAE
+features that generalize better to UDA-nudity than i2p-trained or
+counterfactual-trained masks. Mask concentrates on `down.2.1`
+(24/41) + `up.0.1` (16/41); `mid.0` contributes 0.
 
 ## D-10 intersection ensemble (NEW)
 
