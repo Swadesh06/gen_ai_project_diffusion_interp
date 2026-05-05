@@ -308,3 +308,25 @@ shorter prompts queued; not blocking session.
 
 ### In flight
 - D-5 oracle-transfer on A02-eps0.025 outputs (20/100)
+
+## 2026-05-05 update — autonomous-loop firings (post-session-final-v2)
+
+### Fire 2 landings
+- B02v3_on_mma_v1.md — SAE detector OOD failure on SD v1.4 (AUC 0.388)
+- MMA_oracle_v1.md — MMA adv-gen 74% any-oracle catch (composite defense view)
+- D02 n=500 attempt aborted — too slow (~22s/prompt, 8h ETA)
+
+### Fire 3 cleanup
+- Killed 28 stale cpu-worker tmux sessions
+- All Phase 1c gates closed; all 4 contributions evidenced
+- Framing A canonical
+- D-1, D-2, D-4, D-5, D-7, D-9 all have v1 reports
+- D-6, D-8 (full impl), D-10 are queued substantial code work
+
+### Open questions (next session)
+- D-8 proper: PGD attack against F_c-defended SDXL pipeline (would prove
+  adversarial-robustness via intervention; ~1 hour implementation + run)
+- Per-backbone SAE detector for SD v1.4 (would close MMA OOD gap)
+- D-10 compositional defense full impl
+- FLUX inference hang root cause
+- SAEUron correct nudity feature_idx (HF SAE load works; n_features = 20480)
