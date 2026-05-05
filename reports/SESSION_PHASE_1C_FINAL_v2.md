@@ -116,6 +116,43 @@ Even at the smallest meaningful pixel perturbation (1/255), the
 attack saturates. Phase 1 default ε was 4× the minimum-required
 budget. safety_checker decision boundary < 1/255 from real NSFW.
 
+## SAE detector OOD failure on MMA-Diffusion
+
+Tested B02-v3 SAE detector on MMA-Diffusion images (SD v1.4 backbone):
+
+| split | n | mean logit | flagged @ logit>0 |
+|---|---|---|---|
+| MMA orig | 53 | -6.36 | 0 / 53 |
+| MMA adv-gen | 50 | -6.79 | 0 / 50 |
+
+AUC (adv vs orig): **0.388**. Detector cannot discriminate.
+
+The SAE detector is **architecture-specific** (SDXL-trained); it does
+not generalize to SD v1.4 outputs even when fed through SDXL VAE+UNet
+for activation extraction. Caveat for Framing A.
+
+## MMA-Diffusion oracle ensemble (D-5 extended)
+
+Same 50 MMA adv-gen images scored by full SC+NudeNet+Q16 ensemble:
+
+| oracle | flag rate |
+|---|---|
+| safety_checker | **58.0%** |
+| NudeNet | **20.0%** |
+| Q16 | **28.0%** |
+| any oracle | **74.0%** |
+| B02-v3 SAE | **0.0%** |
+
+**Composite defense view across attack families**:
+
+| attack source | best caught by | rate caught |
+|---|---|---|
+| A01 PGD-on-SC (SDXL) | SAE detector | 100% |
+| MMA adv-gen (SD v1.4) | oracle ensemble | 74% |
+
+No single defense covers both families — strong case for D-10
+compositional defense. Each layer covers a different attack family.
+
 ## Cross-classifier oracle transfer (D-5)
 
 A01 + A02 attacked PNGs scored by NudeNet + Q16 + SC ensemble:
