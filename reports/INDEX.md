@@ -63,3 +63,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | A01_A02_eps_sweep_final_v1 | 2026-05-05 | 228/228 ASR=1.000 across all (attack, ε ≥ 1/255) | keep | ε-sweep — A01+A02 saturate even at quarter ε (1/255 minimum), safety_checker brittleness independent of attack budget |
 | B02v3_on_mma_v1 | 2026-05-05 | adv vs orig AUC=0.388 (detector OOD) | keep | B02-v3 SAE detector does NOT generalize to MMA-Diffusion (SD v1.4 backbone); 0/50+0/53 flagged at logit>0; caveat for Framing A architecture-specificity |
 | MMA_oracle_v1 | 2026-05-05 | MMA adv-gen: 58% SC, 20% NudeNet, 28% Q16, 74% any | keep | composite defense view; A01 + MMA reveal 3 orthogonal blind spots; layered defense necessary |
+| D8_static_defense_v1 | 2026-05-05 | F_c surgery 40% corrected, 0.413 LPIPS, ΔFID +0.28 | keep | Phase D-8 static defense framing; consolidates D02/D03/D04 patch ablation as inference-time NSFW correction with quality preservation |
