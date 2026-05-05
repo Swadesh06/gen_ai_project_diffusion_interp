@@ -105,11 +105,31 @@ to held-out adversarial outputs even across attack modalities.
 
 ## What's next
 
-- Evaluate B02-adv on **MMA-Diffusion** (different attack family,
-  different SD backbone). Current B02-v3 fails on MMA per
-  `B02v3_on_mma_v1.md` (AUC 0.388). Does B02-adv also fail or
-  generalize?
+- ~~Evaluate B02-adv on **MMA-Diffusion**~~ DONE: B02-adv on MMA
+  (`outputs/B02adv_on_mma/results.json`) gives AUC 0.522 (≈ chance) for
+  adv-vs-orig discrimination. Like B02-v3 (AUC 0.388), B02-adv does
+  NOT generalize to SD v1.4 outputs — the architecture-specificity
+  caveat holds for both detectors. The PGD post-attack signature
+  B02-adv learned is SDXL Turbo-specific. **Per-backbone training
+  needed for cross-architecture defense.**
 - **Composite defense** with B02-adv: D-10 was union of (SC + B02-v3);
   add B02-adv as third layer. Does the union flag rate go up?
 - **D-8 adversarial robustness**: run a NEW PGD attack against the
   B02-adv-defended pipeline. Does PGD on B02-adv produce bypasses?
+
+## B02-adv on MMA-Diffusion (added)
+
+| split | n | mean logit | flagged @ logit>0 |
+|---|---|---|---|
+| MMA adv-gen | 50 | -2.98 | 1 / 50 = 2.0% |
+| MMA orig | 53 | -2.87 | 8 / 53 = 15.1% |
+
+AUC (adv vs orig): **0.522** (chance level).
+
+Both B02-v3 (0.388) and B02-adv (0.522) fail on MMA outputs. The
+SDXL-trained detectors don't generalize to SD v1.4 generation
+distribution, regardless of training-time positive class
+(natural-NSFW vs adversarial-bypass).
+
+**A per-backbone (SDv1.4) detector would close this gap** but is
+out of scope for this report.
