@@ -70,6 +70,24 @@ The SAE detector, trained against oracle-relabelled NSFW (which is the
 "any oracle" union), is the **most robust** layer to PGD attack against
 safety_checker. This is the headline Framing A contribution 3 result.
 
+## Cross-ε comparison (added)
+
+Re-ran on the smaller-ε A02 attack (`A02_latent_eps0.025_n100/post`):
+
+| oracle | A01 ε=4/255 (n=200) | A02 ε=0.025 (n=100) |
+|---|---|---|
+| safety_checker (target) | 0.0% | 0.0% |
+| NudeNet | 0.5% | 2.0% |
+| Q16 | 12.0% | 16.0% |
+| any oracle | 12.5% | 17.0% |
+| **escape all 3 oracles** | **87.5%** | **83.0%** |
+
+The cross-oracle escape rate **drops slightly** at smaller ε (87.5% →
+83.0% escape all 3) — at smaller perturbation budgets, the attack is
+less able to target safety_checker's specific decision boundary, and
+slightly more residual content leaks through to Q16. But 83% escape
+still confirms the headline finding.
+
 ## Caveats
 
 - Q16 has a higher false-positive rate (catches more images that may
