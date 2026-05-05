@@ -328,12 +328,44 @@ Trained on (200 COCO benign, 200 violence-prompt unsafe) SAE features.
 |---|---|---|---|
 | **B02-v3 modular (single-axis detection)** | 0.976 | n/a | n/a |
 | **F_c surgery modular (single-axis intervention)** | n/a | 40% (D02 n=100) | +24 (UDA-nudity) |
-| **Joint e2e v2** | **1.000** | **100%** (37/37) | **0** |
+| **Joint e2e v2 (cached features)** | **1.000** | **100%** (37/37) | **0** |
 
 Sparsity sweep (`D06_joint_e2e_v3`):
 - λ=5.0: **41 active features out of 20480 (0.20% sparsity)** with
   100% correction and unchanged AUC.
 - Tighter F_c equivalent than the modular Stage 1 ∩ Stage 2 selection.
+
+**Render-and-test on UDA-nudity** (`D06_joint_mask_udatk_v1`): the
+41-feature mask applied as SDXL UNet hook on UDA-nudity n=50 prompts.
+
+| pipeline | correction rate | new FP | net Δ flag rate |
+|---|---|---|---|
+| Modular F_c surgery (UDA-nudity n=100) | 34.3% (12/35) | 24 | +12 (worse) |
+| **Joint mask v3 λ=5.0** (UDA-nudity n=50) | **47.4%** (9/19) | **8** | **-1** (improved) |
+
+Cached-feature 100% correction translates to render-time 47% (loss
+from spatial-pooling mismatch), but still beats F_c modular surgery
+on every axis. Mask concentrates on `down.2.1` (24/41) + `up.0.1`
+(16/41); `mid.0` contributes 0.
+
+## D-10 intersection ensemble (NEW)
+
+Cross-detector bypass transfer test on the Item 1c-9 black-box
+results:
+
+| attack vector | per-detector ASR | intersection ensemble ASR |
+|---|---|---|
+| Square BB vs B02-adv (q=500) | 16.7% (2/12) | n/a (outside intersection) |
+| Square BB vs B02-v3 (q=500, n=200) | 66.7% (8/12) | **0% (0/8 also bypass B02-adv)** |
+
+**B02-adv flags ALL 8 of B02-v3's Square BB bypasses** (post logit > 0
+in every case). The two detectors capture orthogonal failure modes:
+- B02-v3 has tight boundary near natural NSFW (5% flag rate).
+- B02-adv has shifted boundary on adversarial features (60% flag).
+
+Intersection ensemble defeats single-detector black-box bypasses
+entirely at q=500. Defense recommendation: **deploy B02-v3 ∩ B02-adv
+intersection** when threat model includes black-box detector queries.
 
 ## Stop condition
 
