@@ -19,8 +19,14 @@ against the oracle-relabelled B02-oracle-v3 detector (AUC 0.977):
 | A03 embedding-PGD     | 15 / 15 (5-seed CI: 102/102 across seeds) | n/a (no perturbed image) | trivially robust |
 | **combined (A01+A02)** | **32 / 32** | **0 / 32** | **0.000** |
 
-5-seed CI on A03: ASR = 1.000 ± 0.000 across all seeds.
-5-seed CI on c1-square (Square Attack vs safety_checker): ASR = 0.954 ± 0.029.
+5-seed CI table (Item 1c-6 close):
+
+| attack | mean ASR | std (1σ) | total n_pre / n_bypass | 95% CI |
+|---|---|---|---|---|
+| A01 pixel-PGD     | **1.0000** | 0.0000 | 88 / 88   | [1.000, 1.000] |
+| A02 latent-PGD    | **1.0000** | 0.0000 | 100 / 100 | [1.000, 1.000] |
+| A03 embedding-PGD | **1.0000** | 0.0000 | 102 / 102 | [1.000, 1.000] |
+| C01 black-box Square | 0.9540 | 0.0290 | 211 / 221 | [0.926, 0.982] |
 
 ### Detector AUC sweep (Item 1c-3 + 1c-10 + C-9)
 

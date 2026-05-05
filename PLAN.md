@@ -246,3 +246,28 @@ Beyond these ten, ideas to prototype if compute remains:
 - Multi-concept defense (C-4) — extend F_c to violence, Van Gogh
 - Cross-model transfer (C-5) — load SD3 + extract aligned activations
 
+
+---
+
+## 2026-05-05 update — Phase 1c continuation, framing-decision moment
+
+### Landed since last update
+- REFRAMING_DECISION.md — Framing A canonical (mixed evidence; 4 inputs banked)
+- cf_probe_strategy2_sae_v1 — SAE features tie raw on Strategy 2 (AUC 0.9412 vs 0.9436)
+- D02_D03_D04_lpips_gpu_v1 — patch-kind ablation tied: LPIPS=0.413, FID Δ<0.06, CLIP Δ<0.001
+- D04_violence_v1 — cross-concept; AUC=1.000; 0 nudity/violence feature overlap
+- A01_5seed_ci_v1 — 5/5 seeds at ASR=1.000 (88/88 bypass)
+- Item_1c6_5seed_ci_final — combined 5-seed CI table for all 4 attacks
+
+### In flight
+- D-5 oracle-transfer (A01-s1 post → NudeNet+Q16+SC) — 40/200 done (slow CPU NudeNet)
+- D-9 SD3 I2P n=100 — 80/100 done (4 flagged so far)
+- D-9 FLUX safety smoke n=20 — model loading
+
+### Queued
+- Phase D-6 joint end-to-end training (smoke done, full version skeleton)
+- Phase D-8 adversarial training (script skeleton; full version uses A01-defense-static proxy)
+- Phase D-10 compositional defense (script skeleton)
+- B02-v3 vs MMA-Diffusion adv-gen — abandoned this session (device mismatch in head/feat); fix queued
+- SAEUron correct nudity feature_idx — abandoned (no published per-concept indices for SAEUron_coco)
+
