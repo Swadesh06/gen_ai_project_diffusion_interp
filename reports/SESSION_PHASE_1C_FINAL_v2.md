@@ -167,6 +167,88 @@ ensemble (SC + NudeNet + Q16) catches at most 17% of bypasses. The
 SAE detector (B02-v3, AUC 0.977) catches **all** of them on Item 1c-1
 (transferability=0.000). The SAE detector is the strongest layer.
 
+## D-6 adversarial-trained SAE detector (NEW)
+
+Trained a B02-style linear probe on **adversarial-bypassed SAE features**
+instead of natural-NSFW features. n=188 (A01+A02 5-seed bypass) + n=500
+(COCO benign), 80/20 train/val split.
+
+Held-out test on **A03 embedding-PGD 5-seed bypass** (n=102):
+
+| detector | flagged @ logit>0 | rate | mean logit |
+|---|---|---|---|
+| **B02-adv (this work)** | **101 / 102** | **99.0%** | +9.48 |
+| **B02-v3 oracle (baseline)** | 33 / 102 | 32.4% | -1.51 |
+
+**Δ = 66.6 pp absolute, 3.0× improvement.** The adversarial-trained
+detector generalizes from (A01 pixel-PGD + A02 latent-PGD) to A03
+embedding-PGD (different attack space) with 99% catch rate.
+
+Caveat: B02-adv on MMA-Diffusion = AUC 0.522 (chance). Architecture-
+specific to SDXL Turbo; doesn't generalize to SD v1.4. Per-backbone
+training is the unblocked path.
+
+## D-10 compositional defense (NEW)
+
+Per-image union of (safety_checker, B02-v3 SAE detector) on D02 outputs
+(n=100):
+
+| condition | safety_checker | SAE | union | only-SC | only-SAE | both |
+|---|---|---|---|---|---|---|
+| pre (no F_c) | 10% | 5% | 14% | 9 | 4 | 1 |
+| post (F_c) | 9% | 7% | 16% | 9 | 7 | 0 |
+
+F_c surgery shifts NSFW signal from SC → SAE detector rather than
+removing it. F_c is most useful as a generation-time defense, not as
+a detection-union booster.
+
+## D-8 / Phase D static defense view (NEW)
+
+F_c surgery patch ablation (mean / zero / resample) all give 4/10
+correction on safety_checker pre_flagged at n=100:
+
+| variant | LPIPS-vgg | FID Δ | CLIP Δ |
+|---|---|---|---|
+| D02 mean-patch | 0.413 | +0.28 | -0.0003 |
+| D03 zero-patch | 0.413 | +0.32 | -0.0003 |
+| D04 resample-patch | 0.413 | +0.28 | -0.0004 |
+
+All three patches tied. Patch operation doesn't matter; F_c selection
+dominates. Mean-patch is the simplest sufficient choice.
+
+## Item 1c-4 close (NEW)
+
+F_c surgery on UDA-nudity n=100 (SDXL Base 4-step, CFG 7.5):
+- pre_flagged: 35/100 = 35.0%
+- post_flagged (F_c): 47/100 = 47.0%
+- corrected: 12/35 = 34.3%
+- net Δ flag rate: +12pp (worse)
+
+Correction rate generalizes from D02 (40%); but **24 new false positives**
+appear on previously-safe images. F_c surgery is prompt-distribution-
+conditional. UDA-nudity is more adversarial than I2P-NSFW; F_c
+intervention introduces artefacts that safety_checker reads as NSFW.
+
+## Item 1c-5 SAEUron close (NEW)
+
+Data-driven Fisher-ratio scoring on `bcywinski/SAeUron_coco` SAE
+(20480 features). Top-1 nudity feature_idx = **12571** (Fisher 1.19).
+
+Re-ran `repro_saeuron_streamlined.py` with feature 12571:
+- no_intervention: 14/30 flagged = 46.7%
+- with_saeuron (12571, mult -3.0): 12/30 = 40.0%
+- Δ = -6.7 pp (correct direction; v1 with cat-feature 11627 had +10pp wrong direction)
+
+## Item 1c-1 5-seed scaling (NEW)
+
+C01 cross-target transferability scaled to 5 seeds × 2 attacks (10 runs):
+- A01 5-seed: 88 pre, 83 safety_bypass, 1 both
+- A02 5-seed: 100 pre, 90 safety_bypass, 0 both
+- **Combined: 1/173 = 0.58% transferability**, Wilson 95% CI [0.10%, 3.20%]
+
+The B02-v3 SAE detector blocks 99.4% of safety-bypassing PGD
+perturbations across 5 seeds × 2 attack spaces.
+
 ## New datasets ingested
 
 - MMA-Diffusion image set (just-granted access this session): 53 orig
