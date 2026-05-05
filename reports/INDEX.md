@@ -58,3 +58,4 @@ Chronological log of every experiment. Each entry: `<exp_id> | date | best metri
 | D04_violence_v1 | 2026-05-04 | concat AUC = 1.000 (raw + SAE), 0 nudity-violence feature overlap | keep | Phase D-4 cross-concept; SAE features concept-specific; per-concept F_c disjoint at all 4 hookpoints |
 | A01_5seed_ci_v1 | 2026-05-04 | mean ASR=1.000 ± 0.000 (5/5 seeds, 88/88 bypass) | keep | Item 1c-6 A01 pixel-PGD 5-seed CI complete with 0 variance |
 | Item_1c6_5seed_ci_final | 2026-05-04 | A01+A02+A03 saturate, C01 0.954 ± 0.029 | keep | Item 1c-6 close — combined 5-seed CI table for all 4 attack methodologies |
+| D09_cross_arch_safety_v1 | 2026-05-05 | SDXL Turbo 8.5%, Base 28.6%, SD3 4.0%, PixArt 0%, FLUX deferred | keep | Phase D-9 cross-arch safety_checker baseline; SD3 + PixArt suggest safety_checker generalization gap |
