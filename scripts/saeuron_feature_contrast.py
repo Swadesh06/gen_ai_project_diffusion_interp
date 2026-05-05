@@ -66,14 +66,22 @@ def main():
                 eo = sae.encode(inp_flat)
             # eo is EncoderOutput; access .top_acts or similar
             if hasattr(eo, "top_acts"):
-                # SAEUron returns sparse (top_acts, top_indices, ...) — convert to dense via index_add
-                top_acts = eo.top_acts  # (B, S, k)
-                top_idx = eo.top_indices  # (B, S, k)
-                B, S, k = top_acts.shape
-                F = sae.encoder.weight.shape[0]
-                z_dense = torch.zeros(B, S, F, device=top_acts.device)
-                z_dense.scatter_add_(2, top_idx, top_acts)
-                z_per_sample = z_dense.mean(dim=1)  # (B, F)
+                top_acts = eo.top_acts
+                top_idx = eo.top_indices
+                # Handle both 2D (B*S, k) and 3D (B, S, k) cases
+                if top_acts.dim() == 2:
+                    BS, k = top_acts.shape
+                    F = sae.encoder.weight.shape[0]
+                    z_dense = torch.zeros(BS, F, device=top_acts.device)
+                    z_dense.scatter_add_(1, top_idx, top_acts)
+                    # Average over the BS dim (single sample, all spatial positions)
+                    z_per_sample = z_dense.mean(dim=0, keepdim=True)
+                else:
+                    B, S, k = top_acts.shape
+                    F = sae.encoder.weight.shape[0]
+                    z_dense = torch.zeros(B, S, F, device=top_acts.device)
+                    z_dense.scatter_add_(2, top_idx, top_acts)
+                    z_per_sample = z_dense.mean(dim=1)
             else:
                 z = eo
                 z_per_sample = z.float().mean(dim=tuple(range(1, z.ndim - 1)))
