@@ -141,8 +141,15 @@ def fill_grid():
         0.000, 15, 0, "extrapolation from A01 cross-target ~0% to A02 (audit consistency)")
 
     # BB Square q=500
-    grid[("BB_Square_q500", "safety_checker")] = ("estimated from q=5K and ε-sweep saturation",
-        None, None, None, "q=500 vs SC not directly measured; q=5K = 0.954, expected lower at q=500")
+    # BB Square q=500 vs SC: direct measurement from G3_square_q500_sc_n50
+    s_sq500 = attack_summary("outputs/G3_square_q500_sc_n50")
+    if s_sq500:
+        grid[("BB_Square_q500", "safety_checker")] = ("direct BB Square q=500 vs SC (n=50)",
+            s_sq500.get("asr_among_pre_flagged"), s_sq500.get("n_pre_flagged"), s_sq500.get("n_bypass"),
+            "G3_square_q500_sc_n50/summary.json")
+    else:
+        grid[("BB_Square_q500", "safety_checker")] = ("estimated from q=5K and ε-sweep saturation",
+            None, None, None, "q=500 vs SC not directly measured; q=5K = 0.954")
     grid[("BB_Square_q500", "nudenet")] = ("cross-classifier transfer from BB Square q=5K SC bypasses",
         None, None, None, "transfer extrapolation: NudeNet largely unaffected by PGD-on-SC perturbations")
     grid[("BB_Square_q500", "q16")] = ("cross-classifier transfer from BB Square q=5K SC bypasses",

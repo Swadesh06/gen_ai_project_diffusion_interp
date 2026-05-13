@@ -12,7 +12,7 @@ The Gate 3 grid is a 38-cell matched-budget matrix: 4 white-box rows × 5 target
 | WB A01 pixel-PGD ε=2/255 | 1.000 (9/9) | ε-sweep extrap. † | ε-sweep extrap. † | **1.000** (2/2) | **0.971** (33/34) |
 | WB A01 pixel-PGD ε=1/255 | 1.000 (11/11) | ε-sweep extrap. † | ε-sweep extrap. † | queued ‡ | **0.500** (17/34) |
 | **WB A02 latent-PGD ε=0.1** | **1.000** (100/100) | 0.000 (0/1) † | 0.478 (32/67) † | 0.000 (0/15) † | 0.000 (0/15) † |
-| **BB Square q=500** | queued ‡ | x-class transfer ‡ | x-class transfer ‡ | **0.667** (8/12) | **0.167** (2/12) |
+| **BB Square q=500** | **0.857** (6/7) | x-class transfer ‡ | x-class transfer ‡ | **0.667** (8/12) | **0.167** (2/12) |
 | **BB Square q=5K** | **0.954 ± 0.029** (5-seed, 211/221) | x-class transfer ‡ | x-class transfer ‡ | extrapolation ‡ | extrapolation ‡ |
 | BB Square q=10K | queued ‡ | queued ‡ | queued ‡ | queued ‡ | queued ‡ |
 | **BB NES q=5K** | in flight n=10 ‡ | — | — | — | — |

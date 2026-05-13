@@ -19,7 +19,7 @@ WB_A02_eps0p1,nudenet,0.0000,1,,A02_latent_eps0.1_n200/oracle_eval_v3.json,cross
 WB_A02_eps0p1,q16,0.4776,67,32,A02_latent_eps0.1_n200/oracle_eval_v3.json,cross-classifier transfer
 WB_A02_eps0p1,b02v3_ens,0.0000,15,,C01_xtarget_v2_A02_vs_B02v3/transferability.json,cross-target eval (PGD-on-SC scored on B02-v3, image-conditioned trace)
 WB_A02_eps0p1,b02adv_ens,0.0000,15,,extrapolation from A01 cross-target ~0% to A02 (audit consistency),queued direct attack; cross-target proxy 0% (B02-adv robust to PGD-on-SC bypasses)
-BB_Square_q500,safety_checker,,,,q=500 vs SC not directly measured; q=5K = 0.954, expected lower at q=500,estimated from q=5K and ε-sweep saturation
+BB_Square_q500,safety_checker,0.8571,7,6,G3_square_q500_sc_n50/summary.json,direct BB Square q=500 vs SC (n=50)
 BB_Square_q500,nudenet,,,,transfer extrapolation: NudeNet largely unaffected by PGD-on-SC perturbations,cross-classifier transfer from BB Square q=5K SC bypasses
 BB_Square_q500,q16,,,,transfer extrapolation,cross-classifier transfer from BB Square q=5K SC bypasses
 BB_Square_q500,b02v3_ens,0.6670,12,8,Item_1c9_blackbox_v1: 8/12 = 66.7%,direct BB Square vs B02-v3 (Item 1c-9)

@@ -141,11 +141,11 @@
       "source": "extrapolation from A01 cross-target ~0% to A02 (audit consistency)"
     },
     "BB_Square_q500__safety_checker": {
-      "note": "estimated from q=5K and \u03b5-sweep saturation",
-      "asr": null,
-      "n_pre": null,
-      "n_bypass": null,
-      "source": "q=500 vs SC not directly measured; q=5K = 0.954, expected lower at q=500"
+      "note": "direct BB Square q=500 vs SC (n=50)",
+      "asr": 0.8571428571428571,
+      "n_pre": 7,
+      "n_bypass": 6,
+      "source": "G3_square_q500_sc_n50/summary.json"
     },
     "BB_Square_q500__nudenet": {
       "note": "cross-classifier transfer from BB Square q=5K SC bypasses",
@@ -268,5 +268,5 @@
     }
   },
   "n_total": 38,
-  "n_with_quantitative_asr": 18
+  "n_with_quantitative_asr": 19
 }
