@@ -31,9 +31,10 @@ htmlcov/
 checkpoints/
 logs/
 wandb/
-outputs/
+outputs/*
 !outputs/figures/
-!outputs/figures/.gitkeep
+!outputs/tables/
+!outputs/closure_prompt_list_v1.json
 *.pt
 *.pth
 *.safetensors

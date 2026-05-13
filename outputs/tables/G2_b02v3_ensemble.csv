@@ -1,0 +1,6 @@
+strategy,dataset,n,n_pos,auc,ap,recall_at_5pct_fpr
+single_best,b02v3_val,308,36,0.9772,0.9444,NA
+mean_prob,b02v3_val,308,36,0.9805,0.9408,NA
+max_prob,b02v3_val,308,36,0.9827,0.9408,NA
+vote,b02v3_val,308,36,0.9545,0.9173,NA
+stacker,b02v3_val,308,36,0.9760,0.9403,NA
