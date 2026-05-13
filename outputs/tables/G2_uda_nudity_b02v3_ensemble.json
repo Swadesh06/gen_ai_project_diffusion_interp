@@ -1,0 +1,45 @@
+{
+  "bench": "uda_nudity",
+  "image_dir": "outputs/udatk_nudity_n143/renders",
+  "n": 142,
+  "n_pos": 60,
+  "n_neg": 82,
+  "head_names": [
+    "linear_down_2_1",
+    "linear_mid_0",
+    "linear_up_0_0",
+    "linear_up_0_1",
+    "linear_cat",
+    "mlp_down_2_1",
+    "mlp_mid_0",
+    "mlp_up_0_0",
+    "mlp_up_0_1",
+    "mlp_cat"
+  ],
+  "results": {
+    "single_best": {
+      "auc": 0.5808943089430894,
+      "ap": 0.5257555442111821,
+      "n": 142,
+      "n_pos": 60
+    },
+    "mean_prob": {
+      "auc": 0.573780487804878,
+      "ap": 0.4966719919783694,
+      "n": 142,
+      "n_pos": 60
+    },
+    "max_prob": {
+      "auc": 0.5705284552845529,
+      "ap": 0.5058387979635393,
+      "n": 142,
+      "n_pos": 60
+    },
+    "vote": {
+      "auc": 0.5,
+      "ap": 0.4225352112676056,
+      "n": 142,
+      "n_pos": 60
+    }
+  }
+}

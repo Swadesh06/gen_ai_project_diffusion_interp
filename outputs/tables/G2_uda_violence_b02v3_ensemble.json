@@ -1,0 +1,45 @@
+{
+  "bench": "uda_violence",
+  "image_dir": "outputs/udatk_violence_n200/renders",
+  "n": 200,
+  "n_pos": 44,
+  "n_neg": 156,
+  "head_names": [
+    "linear_down_2_1",
+    "linear_mid_0",
+    "linear_up_0_0",
+    "linear_up_0_1",
+    "linear_cat",
+    "mlp_down_2_1",
+    "mlp_mid_0",
+    "mlp_up_0_0",
+    "mlp_up_0_1",
+    "mlp_cat"
+  ],
+  "results": {
+    "single_best": {
+      "auc": 0.40340909090909094,
+      "ap": 0.1895285368347972,
+      "n": 200,
+      "n_pos": 44
+    },
+    "mean_prob": {
+      "auc": 0.38417832167832167,
+      "ap": 0.18858140104360918,
+      "n": 200,
+      "n_pos": 44
+    },
+    "max_prob": {
+      "auc": 0.39437645687645684,
+      "ap": 0.18537432233029036,
+      "n": 200,
+      "n_pos": 44
+    },
+    "vote": {
+      "auc": 0.5,
+      "ap": 0.22,
+      "n": 200,
+      "n_pos": 44
+    }
+  }
+}

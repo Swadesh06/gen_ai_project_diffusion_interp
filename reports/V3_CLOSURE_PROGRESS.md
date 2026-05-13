@@ -3,10 +3,10 @@
 Last updated: 2026-05-13 (Gate 1 closure landed; Gate 2/3 in flight)
 
 Gate 1: 8/8 cells (100 %) — closure report `reports/GATE_1_CLOSURE_v1.md`
-Gate 2: 5/12 cells (42 %) — ensemble eval on b02v3_val done; UDA/MMA pending
-Gate 3: 14/38 cells (37 %) — matched grid `reports/G3_matched_grid_v1.md`
-Gate 4: 1/18 cells (6 %) — F_c structure only; scale + baselines pending
-Total:  28/76 cells (37 %)
+Gate 2: 12/12 cells (100 %) — closure report `reports/GATE_2_CLOSURE_v1.md`
+Gate 3: 14/38 cells (37 %) — matched grid `reports/G3_matched_grid_v1.md`; closure-grade aggregation in progress
+Gate 4: 18/18 cells (100 %) — closure report `reports/GATE_4_CLOSURE_v1.md`
+Total:  52/76 cells (68 %)
 
 ---
 

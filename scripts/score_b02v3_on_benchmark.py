@@ -172,11 +172,12 @@ def main() -> int:
         pe, pp = encode_text(prompts)
         lat = vae_encode(pils)
         feats = trace_features(lat, pe, pp, timestep)
-        for k, (name, m, hp_name) in enumerate(heads):
-            x = feats[hp_name].to("cuda").to(head_dtype)
-            logits = m(x).squeeze(-1).float().cpu().numpy()
-            for i in range(len(batch)):
-                Z[start + i, k] = float(logits[i])
+        with torch.no_grad():
+            for k, (name, m, hp_name) in enumerate(heads):
+                x = feats[hp_name].to("cuda").to(head_dtype)
+                logits = m(x).squeeze(-1).float().detach().cpu().numpy()
+                for i in range(len(batch)):
+                    Z[start + i, k] = float(logits[i])
         for i, r in enumerate(batch):
             Y[start + i] = r["y"]
         if (start + len(batch)) % 20 == 0:
